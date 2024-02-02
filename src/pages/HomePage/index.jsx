@@ -23,6 +23,7 @@ import { NavLink, Outlet, useLoaderData, useNavigate } from "react-router-dom";
 import { AccountBox, Dashboard, Favorite, Group, Home,  Logout,  Public, RecentActors } from "@mui/icons-material";
 import { getAuth, signOut } from "firebase/auth";
 import app from "../../firebase/config";
+import { ToastContainer, /*toast*/ } from "react-toastify";
 
 const drawerWidth = 240;
 
@@ -32,6 +33,17 @@ const auth = getAuth(app)
 function HomePage() {
   const user = useLoaderData() 
   const navigate = useNavigate();
+
+//   React.useEffect(() => {
+//     const theUser = auth.currentUser
+//     if (theUser.displayName === null) {
+//       toast.info("veuillez configurez votre compte pour effectuer un post", {
+//         delay: 2000,
+//         position:'bottom-left',
+//     })
+    
+//   }
+// })
 
   // const { window } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -226,7 +238,9 @@ function HomePage() {
   // const container = window !== undefined ? () => window().document.body : undefined;
 
   return (
+    
     <Box sx={{ display: "flex" }}>
+        <ToastContainer/>
       <CssBaseline />
       <AppBar
         position="fixed"
@@ -259,10 +273,10 @@ function HomePage() {
           </Typography>
 
           <Box sx={{ flexGrow: 0 }}>
-            {`${user?.displayName} - `}
+            {`${user?.displayName || user?.email} - `}
             <Tooltip title="Vos paramètres">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt={user?.displayName} src={user?.photoURL} />
+                <Avatar alt={user?.displayName || "Inconnu"} src={user?.photoURL} />
               </IconButton>
             </Tooltip>
             <Menu

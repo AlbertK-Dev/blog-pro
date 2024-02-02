@@ -1,6 +1,7 @@
 import {
     AccountCircle,
     AddAPhoto,
+    Email,
     Facebook,
     Google,
     Lock,
@@ -30,38 +31,21 @@ import {
     // ThemeProvider,
     // useTheme,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, {  useState } from "react";
 import styles from "./style";
-import { Link as RouterLinK, useLoaderData, useNavigate } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { useDimensions } from "../../hooks/useDimensions";
 import { useFormik } from "formik";
-import { FacebookAuthProvider, GoogleAuthProvider, createUserWithEmailAndPassword, getAuth,  signInWithPopup/*, signInWithRedirect*/, updateProfile } from "firebase/auth";
+import { FacebookAuthProvider, GoogleAuthProvider, createUserWithEmailAndPassword, getAuth,   sendSignInLinkToEmail,  signInWithPopup/*, signInWithRedirect*/, updateProfile } from "firebase/auth";
 import {getDownloadURL, getStorage, ref, uploadBytes} from "firebase/storage"
 import app from "../../firebase/config";
 import 'react-toastify/dist/ReactToastify.min.css';
 import { ToastContainer, toast } from 'react-toastify';
+import valiteRegistration from "./validate";
 // import muiCustomThemeTextField from "../Tests/muiCostumThemeTextField";
 // import btnColorTheme from "../Tests/muiCustomButtonTheme";
 
-//fake delay
-async function delay(temps) {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            const arrayPseudo = ["Albert", "Kameni", "Tchagou", "krist"];
-            const arrayEmail = [
-                "albert@gmail.com",
-                "kameni@gmail.com",
-                "tchagou@gmail.com",
-                "krist@gmail.com"
-            ];
-            const array = {
-                emails: arrayEmail,
-                pseudos: arrayPseudo,
-            };
-            resolve(array);
-        }, temps);
-    });
-}
+
 
 const auth = getAuth(app)
 const storage = getStorage();
@@ -78,16 +62,16 @@ function SignupPage() {
     const [signupError, setSignupError] = useState('');
     const [imgChoozen, setImgChoozen] = useState('Default');
     const [imgfile, setImgfile] = useState([])
-    const defaultPhotoURL = useLoaderData();
+    const defaultPhotoURL = useLoaderData() || 'none';
 
 
     const onSmallDevice = innerWidth <= 500;
     const navigate = useNavigate()
 
 
-    async function createUser(formValues, onSubmittingProps) {
+    async function handleCreateUser(formValues, onSubmittingProps) {
 
-        console.log(formValues);
+       
         try {
             //création de l'utilisateur
            const cred =  await signUp(formValues.email, formValues.password);
@@ -152,80 +136,20 @@ function SignupPage() {
         email: "",
         pseudo: "",
         password: "",
+      
         confirmPassword: "",
         acceptTerms: false,
     };
 
-    async function validate(formValues) {
-        const array = await delay(100);
-
-
-        return new Promise((resolve, reject) => {
-            let allE = [];
-            let allP = [];
-            allE = array.emails;
-            allP = array.pseudos;
-            const allEmail = allE.map((email = '') => email.toLowerCase())
-            const allPseudo = allP.map((pseudo = '') => pseudo.toLowerCase())
-
-
-            const errors = {};
-            const emailRegx = new RegExp(/[a-zA-Z0-9]+@[a-zA-Z]+\.[a-zA-Z]{2,3}/);
-
-            //pseudo
-            if (formValues.pseudo === "") {
-                errors.pseudo = "Veuillez renseigner ce champ.";
-            }
-            if (formValues.pseudo.length <= 3) {
-                errors.pseudo = "le pseudo doit contenir au moins 03 caractères";
-            }
-            if (allPseudo.includes(formValues.pseudo.toLowerCase())) {
-                errors.pseudo = "ce pseudo est déja utiliser";
-            }
-
-            //email
-            if (formValues.email === "") {
-                errors.email = "Veuillez renseigner ce champ.";
-            }
-            if (emailRegx.test(formValues.email) === false) {
-                errors.email = "cette email n'est pas valide";
-            }
-            if (allEmail.includes(formValues.email.toLowerCase())) {
-                errors.email = "cet email est déja utilisé";
-            }
-
-            //password
-            if (formValues.password === "") {
-                errors.password = "Veuillez renseigner ce champ.";
-            }
-            if (formValues.password.length < 8) {
-                errors.password =
-                    "Le mot de passe doit contenir au moins 08 caractères";
-            }
-
-            //confirmPassord
-            if (formValues.confirmPassword === "") {
-                errors.confirmPassword = "Veuillez renseigner ce champ.";
-            }
-
-            if (formValues.confirmPassword !== formValues.password) {
-                errors.confirmPassword = "Les mots de passes ne correspondent pas.";
-            }
-
-            if (!formValues.acceptTerms) {
-                errors.acceptTerms = "Vous devez accepter les conditions";
-            }
-
-            resolve(errors);
-        });
-    }
+    
 
     const formik = useFormik({
         initialValues,
-        onSubmit: createUser,
-        validate,
+        onSubmit: handleCreateUser,
+        validate: valiteRegistration,
     });
 
+   
  
 
     //const mytheme = useTheme()
@@ -242,39 +166,33 @@ function SignupPage() {
         width: 1,
     });
 
+    console.log(formik.values)
     return (
-        // <ThemeProvider theme={muiCustomThemeTextField(mytheme)}>
-        // <Stack sx={{...styles.Stack, backgroundColor:'rgba(29, 28, 28, 0.842)' }}>
+        
         <Stack sx={{
-            ...styles.Stack,
-            backgroundColor: onSmallDevice ? 'darkblue' : 'rgba(0,0,0,0.5)',
-            // backgroundImage: onSmallDevice ? null : "url('./logo2.png')",
-            // backgroundAttachment: 'fixed',
-            // backgroundSize: 'cover',
-            background: 'linear-gradient(0deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 0%, rgba(21,147,172,1) 67%, rgba(0,212,255,1) 100%)',
+            ...styles.Stack
         }}>
             <ToastContainer />
             <Box sx={{
                 ...styles.box,
 
-                transform: onSmallDevice ? null : 'scale(0.9,0.9)',
-                border: `3px solid ${ICONS_COLOR}`,
-                width: onSmallDevice ? '96%' : 450,
-                borderRadius: '5px',
-                backgroundColor: onSmallDevice ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.9)',
-                margin: '3px'
-
+                transform: onSmallDevice ? 'scale(0.9,0.9)' : 'scale(0.8,0.8)',
+                marginTop: onSmallDevice? '10px':null,
+                width: onSmallDevice ? '90%' : 450,
+                
             }}>
 
                 <form onSubmit={formik.handleSubmit}>
 
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <Box sx={{...styles.flexCenter}}>
                         <Box sx={{ display: 'flex', alignItems: 'baseline', position: 'relative', }}>
-                            <Avatar sx={{ width: 100, height: 100, border: `2px solid ${ICONS_COLOR}` }} className="photoPreview" alt="Photo De Profile" src={imgChoozen} />
+                            <Avatar sx={{ ...styles.avatar }} className="photoPreview" alt="Photo De Profile" src={imgChoozen} />
                             <Tooltip title='Ajouter une photo de Profil'><IconButton size="small" sx={{ height: '24px', width: '24px', zIndex: 5, position: 'absolute', right: '0', bottom: 0 }} component="label" >
                                 <AddAPhoto color="primary" />
 
-                                <VisuallyHiddenInput className="inputPhoto"
+                                <VisuallyHiddenInput
+                                    className="inputPhoto"
+                                   
                                     onChange={(e) => {
                                         console.log(e.target.files[0])
                                         setImgChoozen(window.URL.createObjectURL(e.target.files[0]).toString())
@@ -282,6 +200,7 @@ function SignupPage() {
                                     setImgfile(e.target.files);
 
                                     }}
+                                    
                                     type="file"
                                     accept="image/png, image/jpeg"
                                     capture name="avatar" />
@@ -500,7 +419,7 @@ function SignupPage() {
                 {/*<Divider>
           <Chip label="vous possédez déja un compte ?" size="small" />
         </Divider> */}
-                <Typography variant="body2" sx={{ ...styles.text, justifyContent: 'flex-start' }}>
+                {/* <Typography variant="body2" sx={{ ...styles.text, justifyContent: 'flex-start' }}>
                     Déja un compte?
                     <Tooltip title={'Cliquer ICI pour vous connecter'} placement="top" arrow>
                         <Link component={"button"} underline="hover">
@@ -513,7 +432,7 @@ function SignupPage() {
                     </Tooltip>
 
 
-                </Typography>
+                </Typography> */}
                 <Divider sx={
                     {
                         color: ICONS_COLOR,
@@ -533,7 +452,8 @@ function SignupPage() {
 
                     }} />
                 </Divider>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ ...styles.text, justifyContent: "flex-start", backgroundColor: '' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Box sx={{ ...styles.text, justifyContent: "flex-start", backgroundColor: '' }}>
                     <Tooltip title="se connecter avec Google" placement="top" arrow>
                         <IconButton onClick={async () => {
                             try {
@@ -563,6 +483,41 @@ function SignupPage() {
 
                         }} >
                             <Facebook color="primary" sx={{ color: 'blue' }} />
+                        </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="recevoir un email de connexion" placement="top" arrow>
+                        <IconButton  onClick={async () => {
+                            try {
+                                const email= window.prompt('veuillez saisir votre email pour recevoir le lien de connexion')
+                                const actionCodeSettings = {
+                                    url: window.location.href,
+                                    handleCodeInApp: true,
+                                };
+                                sendSignInLinkToEmail(auth, email, actionCodeSettings)
+                                    .then(() => {
+                                        window.localStorage.setItem('emailForSignIn', email);
+                                       
+                                        toast.info(`lien de connexion envoyé à ${email}`, {
+                                            delay: 1000,
+                                            position:'top-center'
+                                        })
+                                       
+                                    })
+                                    .catch((error) => {
+                                        setSignupError(error.code || error.message || error.statusText)
+                        
+                                    })
+
+
+                                
+                            } catch (error) {
+                                setSignupError(error.code)
+                            }
+                            
+
+                        }} >
+                            <Email color="primary" sx={{ color: 'orange' }} />
                         </IconButton>
                     </Tooltip>
 

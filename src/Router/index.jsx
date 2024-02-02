@@ -1,8 +1,6 @@
 import { Navigate, RouterProvider, createBrowserRouter, redirect } from "react-router-dom";
 import React from 'react'
-import PubPage from "../pages/PubPage";
-import SignupPage from "../pages/SignupPage";
-import SigninPage from "../pages/SigninPage";
+
 import EmailVerificator from "../pages/EmailVerificator";
 import HomePage from "../pages/HomePage";
 import ErrorPage from "../pages/ErrorPage";
@@ -11,8 +9,9 @@ import NotFoundPage from "../pages/NotFoundPage";
 import { browserLocalPersistence, getAuth, onAuthStateChanged, /*,onAuthStateChanged*/ 
 setPersistence} from "firebase/auth";
 import app from "../firebase/config";
-import TestPage from "../pages/Tests/TestPage";
+
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
+import AuthPage from "../pages/AuthPage";
 
 const auth = getAuth(app)
 const storage = getStorage()
@@ -44,8 +43,22 @@ const mainRouter = createBrowserRouter([
 
     },
     {
-        path: '/test',
-        element : <TestPage/>
+        path: '/auth',
+        element : <AuthPage/>,
+        loader: async () => {
+
+            const user = await getAuthStatus()
+            console.log('router login ',user)
+            if (user != null) {
+                   return     redirect('/app');
+            }
+            const userDefaultPhotoRef = ref(storage, 'users/default/avatarDefault.jpg');
+            const urlDefault = await getDownloadURL(userDefaultPhotoRef);
+            console.log('default photo : ', urlDefault)
+            return urlDefault;
+            
+            
+        },
     },
 
     {
@@ -58,7 +71,9 @@ const mainRouter = createBrowserRouter([
             console.log('router ',user)
             if (user == null) {
                    return     redirect('/pub');
-                }else if (user?.emailVerified === false) {
+            } else if ( user.providerData[0].providerId !== 'facebook.com' &&  user?.emailVerified === false) {
+                console.log(user)
+                console.log(user.providerData[0].providerId)
                     return    redirect('/emailVerificator');
                 } else {
                         return user
@@ -110,40 +125,8 @@ const mainRouter = createBrowserRouter([
                 ]
             }]
     },
-    {
-        path: '/login',
-        element: <SigninPage />,
-        loader: async () => {
 
-            const user = await getAuthStatus()
-            console.log('router login ',user)
-            if (user != null) {
-                   return     redirect('/app');
-            }
-            return 0;
-            
-            
-        },
 
-    },
-    {
-        path: '/register',
-        element: <SignupPage />,
-        loader: async () => {
-
-            const user = await getAuthStatus()
-            console.log('router login ',user)
-            if (user != null) {
-                   return     redirect('/app');
-            }
-            const userDefaultPhotoRef = ref(storage, 'users/default/avatarDefault.jpg');
-            const urlDefault = await getDownloadURL(userDefaultPhotoRef);
-            console.log('default photo : ', urlDefault)
-            return urlDefault;
-            
-            
-        },
-    },
     {
         path: '/emailVerificator',
         element: <EmailVerificator />,
@@ -152,7 +135,7 @@ const mainRouter = createBrowserRouter([
             const user = await getAuthStatus()
             console.log('router email verif ',user)
             if (user == null) {
-                   return     redirect('/pub');
+                   return     redirect('/auth');
                 }else if (user?.emailVerified === true) {
                     return    redirect('/app');
                 } else {
@@ -162,10 +145,7 @@ const mainRouter = createBrowserRouter([
         },
     },
 
-    {
-        path: '/pub',
-        element: <PubPage />
-    },
+ 
     {
         path: '/visitor',
         element: <>

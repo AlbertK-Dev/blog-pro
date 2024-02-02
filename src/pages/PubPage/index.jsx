@@ -1,4 +1,4 @@
-import { AccountCircle, Login, Start } from '@mui/icons-material'
+import { Start } from '@mui/icons-material'
 import { Box,  Button,  Divider, Stack, Typography } from '@mui/material'
 import React from 'react'
 import { useDimensions } from '../../hooks/useDimensions'
@@ -10,9 +10,8 @@ const styles = {
     backStack: {
         alignItems: 'center',
         justifyContent: 'center',
-        width: '100%',
-        height: '100vh',
-        backgroundColor: '#f5f5f5'
+        
+        backgroundColor: 'transparent'
     },
     centerContent: {
         display: 'flex',
@@ -43,7 +42,7 @@ function PubPage() {
             <Typography variant='button'>
                         BLOG-PRO
                     </Typography>
-            <Box sx={{...styles.box, width: (onSmallDevice && 250) || (onMediumDevice && 500) || 700, flexDirection: (onSmallDevice && 'column') || (onMediumDevice && 'column') || 'row'}} >
+            <Box sx={{...styles.box, width: (onSmallDevice && 250) || (onMediumDevice && 500) || 700, flexDirection: (onSmallDevice && 'column') || (onMediumDevice && 'column') || 'column'}} >
                 <Box sx={{...styles.centerContent, flexDirection:'column', gap: 3}} >
                     
                     <Typography variant='subtitle2'>
@@ -52,20 +51,10 @@ function PubPage() {
                 <Divider />
                 <Stack direction={'column'} spacing={1} sx={{gap:3, backgroundColor:'whitesmoke'}} >
                     
-                    <Link to={'/login'}>
-                        <Button variant='outlined' fullWidth size='large' endIcon={<Login />}>
-                        
-                        Connectez-vous
-                    </Button>
-                    </Link>
-                    <Link to={'/register'} >
-                        <Button variant='outlined' fullWidth size='large' endIcon={<AccountCircle />}>
-                        Inscrivez-Vous
-                    </Button>
-                    </Link>
+                    
                     
                     <Link to={'/visitor'}>
-                        <Button variant='contained' fullWidth size='large' endIcon={<Start />} >
+                        <Button variant='contained' fullWidth={onSmallDevice}  size='large' endIcon={<Start />} >
                         visiter le site
                     </Button>
                     </Link>
