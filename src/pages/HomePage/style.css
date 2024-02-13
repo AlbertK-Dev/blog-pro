@@ -1,0 +1,27 @@
+
+
+/* .MuiListItemText-primary{
+    font-size: 16px;
+} */
+
+/*SIDE BAR*/
+.lienActif .MuiListItemIcon-root{
+    color: 'green' !important;
+
+}
+
+
+.lienNonActif .MuiListItemIcon-root{
+    color:rgb(128, 128, 128);
+}
+
+.lienNonActif svg{
+    fill: 'red';
+}
+
+.MuiListItem-root:hover{
+    background-color: #1976d2;
+    color: wheat;
+    font-size: 20px;
+}
+

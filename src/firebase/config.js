@@ -1,5 +1,6 @@
 
 import { initializeApp } from "firebase/app";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCpus7wdZEAs40nuClejwFWVeab7MVZNIk',
@@ -11,7 +12,13 @@ const firebaseConfig = {
 };
 
 
- const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+ 
+export const dbPersist = initializeFirestore(app,
+  {
+      localCache:
+      persistentLocalCache(/*settings*/{tabManager: persistentMultipleTabManager()})
+})
 
 
 export default app

@@ -1,0 +1,28 @@
+
+
+#register-email-label, #register-password-label, #register-password-confirm-label, #register-pseudo-label, #addpost-title-label, #addpost-content {
+    font-family: 'Poppins';
+    /*font-size: 18px;*/
+
+    color: 'black' !important;
+    font-size: 15px;
+   
+}
+
+#register-email, #register-password, #register-password-confirm, #register-pseudo, #addpost-title, #addpost-content{
+    font-family: 'Poppins';
+}
+
+#connect-button{
+    font-family: 'Poppins';
+
+}
+
+#siginForm{
+    background-color: black !important;
+}
+
+#resetpass-link:hover {
+    text-decoration: underline !important;
+    color: #1976d2 !important;
+}

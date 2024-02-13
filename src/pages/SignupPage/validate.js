@@ -96,9 +96,7 @@ export default async function valiteRegistration(formValues) {
                 errors.confirmPassword = "Les mots de passes ne correspondent pas.";
             }
 
-            if (!formValues.acceptTerms) {
-                errors.acceptTerms = "Vous devez accepter les conditions";
-            }
+      
 
             resolve(errors);
         });

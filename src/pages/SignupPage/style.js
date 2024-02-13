@@ -6,8 +6,8 @@ const styles = {
     Stack: {
         alignItems: 'center',
         justifyContent: 'center',
-       // width: '100%',
-       // height: '100vh',
+        width: '100%',
+       height: '100vh',
         //backgroundColor: '#f5f5f5',//'rgba(167, 230, 255,0.3)'
         color: 'black',
         backgroundColor: 'transparent',
@@ -25,7 +25,7 @@ const styles = {
         borderRadius: '5px',
                 backgroundColor:  'rgba(255,255,255,0.9)' ,
         margin: '0px',
-        border: `3px solid ${ICONS_COLOR}`,
+      //  border: `3px solid ${ICONS_COLOR}`,
 
 
 

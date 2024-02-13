@@ -11,6 +11,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import styles from "./style";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
@@ -19,20 +20,28 @@ import Tooltip from "@mui/material/Tooltip";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
-import { NavLink, Outlet, useLoaderData, useNavigate } from "react-router-dom";
-import { AccountBox, Dashboard, Favorite, Group, Home,  Logout,  Public, RecentActors } from "@mui/icons-material";
+import { Link as RouterLink, NavLink, Outlet, useLoaderData, useNavigate } from "react-router-dom";
+import { AccountBox, Dashboard, Favorite, Group, Home,  Logout,  Public, RecentActors, Send } from "@mui/icons-material";
 import { getAuth, signOut } from "firebase/auth";
 import app from "../../firebase/config";
 import { ToastContainer, /*toast*/ } from "react-toastify";
+import { blue } from "@mui/material/colors";
+import { Button, Stack, TextareaAutosize } from "@mui/material";
+import { useDimensions } from "../../hooks/useDimensions";
+
 
 const drawerWidth = 240;
 
 
 
 const auth = getAuth(app)
+
+
+
 function HomePage() {
   const user = useLoaderData() 
   const navigate = useNavigate();
+  const [drawerActiveLink, setDrawerActiveLink] = React.useState("000000");
 
 //   React.useEffect(() => {
 //     const theUser = auth.currentUser
@@ -50,12 +59,21 @@ function HomePage() {
   const [isClosing, setIsClosing] = React.useState(false);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
+  const disableMenuListPadding = false
+
+  const { innerWidth } = useDimensions()
+  const onSmallDevice = innerWidth <= 0;
+  console.log(onSmallDevice)
+ 
+
+  const NAV_LINK_ACTIVE_COLOR = "#f5f5f5";
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
   const disconnectUser = async () => {
     setAnchorElUser(null);
     await signOut(auth);
@@ -79,59 +97,85 @@ function HomePage() {
   };
 
   const drawer = (
-    <div style={{ backgroundColor: "f5f5f5" }}>
-      <Toolbar
-        sx={{
-          backgroundColor: "skyblue",
-          borderColor: "blue",
-          borderWidth: "3px",
-        }}
-      >
-        BLOG-PRO
+    <div  style={{ backgroundColor: "f5f5f5" }}>
+      <Toolbar>
+        
+        <Typography
+          variant="body1"
+          sx={{
+            ...styles.text,
+            //fontFamily: "Playfair Display",
+            fontFamily: "Great Vibes",
+            fontSize: "40px",
+            //fontWeight: "bold",
+            //textShadow: `2px 2px 5px ${ICONS_COLOR}`,
+            textShadow: `2px 2px 5px ${blue[600]}`,
+           // color: 'white',
+           // textDecoration: 'underline'
+          }}
+        >
+          Blog-Pro
+        </Typography>
       </Toolbar>
-      <Divider />
+      {/* <Divider /> */}
       <List>
         <NavLink
           to={""}
+          className={drawerActiveLink === '100000' ? 'lienActif': 'lienNonActif'}
           style={({ isActive, isPending, isTransitioning }) => {
+            if (isActive ===true) {
+              setDrawerActiveLink('100000');
+            }
             return {
               fontWeight: isActive ? "bold" : "small",
-              border: isActive ? "1px solid black" : "",
-              backgroundColor: isActive? 'whiteSmoke': 'white',
+              // backgroundColor: isActive? NAV_LINK_ACTIVE_COLOR: 'white',
+              border: isActive ? '1px solid #f5f5f5' : '0px solid white',
               color: isPending ? "red" : "black",
               display: "block",
+              textDecoration:'none',
               viewTransitionName: isTransitioning ? "slide" : "",
+              
             };
           }}
         >
-          <ListItem disablePadding>
-            <ListItemButton>
+          <ListItem disablePadding={disableMenuListPadding} >
+            <ListItemButton sx={{borderRadius:'10px'}} >
               <ListItemIcon>
                 <Home />
               </ListItemIcon>
-              <ListItemText primary="Acceuil" />
+              <ListItemText id="home_list" style={{
+                fontSize: '40px',
+                fontWeight: drawerActiveLink === '100000' ? 'bold' : '',
+              }} primary="Acceuil" />
             </ListItemButton>
           </ListItem>
         </NavLink>
 
         <NavLink
           to={"posts"}
+          className={drawerActiveLink === '010000' ? 'lienActif': 'lienNonActif'}
           style={({ isActive, isPending, isTransitioning }) => {
+            if (isActive) {
+              setDrawerActiveLink('010000');
+            }
+            
             return {
-              border: isActive ? "2px solid gray" : "",
-
+              fontWeight: isActive ? "bold" : "small",
+              // backgroundColor: isActive? NAV_LINK_ACTIVE_COLOR: 'white',
+              border: isActive ? '1px solid #f5f5f5' : '0px solid white',
+              color: isPending ? "red" : "black",
               display: "block",
-              textDecoration: "none",
+              textDecoration:'none',
               viewTransitionName: isTransitioning ? "slide" : "",
             };
           }}
         >
-          <ListItem disablePadding>
-            <ListItemButton>
+          <ListItem disablePadding={disableMenuListPadding}>
+            <ListItemButton sx={{borderRadius:'10px'}}>
               <ListItemIcon>
                 <Public />
               </ListItemIcon>
-              <ListItemText primary="Tous les Posts" />
+              <ListItemText primary="Vos posts" />
             </ListItemButton>
           </ListItem>
         </NavLink>
@@ -140,16 +184,18 @@ function HomePage() {
           to={"dashboard"}
           style={({ isActive, isPending, isTransitioning }) => {
             return {
-              fontWeight: isActive ? "bold" : "small",
-              border: isActive ? "2px solid gray" : "",
-              textDecoration: "none",
+              fontWeight: isActive ? NAV_LINK_ACTIVE_COLOR : "small",
+              // backgroundColor: isActive? NAV_LINK_ACTIVE_COLOR: 'white',
+              border: isActive ? '1px solid #f5f5f5' : '0px solid white',
+              color: isPending ? "red" : "black",
               display: "block",
+              textDecoration:'none',
               viewTransitionName: isTransitioning ? "slide" : "",
             };
           }}
         >
-          <ListItem disablePadding>
-            <ListItemButton>
+          <ListItem disablePadding={disableMenuListPadding}>
+            <ListItemButton sx={{borderRadius:'10px'}}>
               <ListItemIcon>
                 <Dashboard />
               </ListItemIcon>
@@ -159,24 +205,27 @@ function HomePage() {
         </NavLink>
        
       </List>
-      <Divider />
+      {/* <Divider /> */}
       <List>
   
 
         <NavLink
           to={"favorite"}
+          
           style={({ isActive, isPending, isTransitioning }) => {
             return {
               fontWeight: isActive ? "bold" : "small",
-              border: isActive ? "2px solid gray" : "",
-              textDecoration: "none",
+              // backgroundColor: isActive? NAV_LINK_ACTIVE_COLOR: 'white',
+              border: isActive ? '1px solid #f5f5f5' : '0px solid white',
+              color: isPending ? "red" : "black",
               display: "block",
+              textDecoration:'none',
               viewTransitionName: isTransitioning ? "slide" : "",
             };
           }}
         >
-          <ListItem disablePadding>
-            <ListItemButton>
+          <ListItem disablePadding={disableMenuListPadding}>
+            <ListItemButton sx={{borderRadius:'10px'}}>
               <ListItemIcon>
                 <Favorite />
               </ListItemIcon>
@@ -190,15 +239,17 @@ function HomePage() {
           style={({ isActive, isPending, isTransitioning }) => {
             return {
               fontWeight: isActive ? "bold" : "small",
-              border: isActive ? "2px solid gray" : "",
-              textDecoration: "none",
+              // backgroundColor: isActive? NAV_LINK_ACTIVE_COLOR: 'white',
+              border: isActive ? '1px solid #f5f5f5' : '0px solid white',
+              color: isPending ? "red" : "black",
               display: "block",
+              textDecoration:'none',
               viewTransitionName: isTransitioning ? "slide" : "",
             };
           }}
         >
-          <ListItem disablePadding>
-            <ListItemButton>
+          <ListItem disablePadding={disableMenuListPadding}>
+            <ListItemButton sx={{borderRadius:'10px'}}>
               <ListItemIcon>
                 <Group />
               </ListItemIcon>
@@ -212,16 +263,18 @@ function HomePage() {
           to={"recent"}
           style={({ isActive, isPending, isTransitioning }) => {
             return {
-              fontWeight: isActive ? "bold" : "small",
-              border: isActive ? "2px solid gray" : "",
-              textDecoration: "none",
+              fontWeight: isActive ? "bold" : "",
+              // backgroundColor: isActive? NAV_LINK_ACTIVE_COLOR: 'white',
+              border: isActive ? '1px solid #f5f5f5' : '0px solid white',
+              color: isPending ? "red" : "black",
               display: "block",
+              textDecoration:'none',
               viewTransitionName: isTransitioning ? "slide" : "",
             };
           }}
         >
-          <ListItem disablePadding>
-            <ListItemButton>
+          <ListItem disablePadding={disableMenuListPadding}>
+            <ListItemButton sx={{borderRadius:'10px'}}>
               <ListItemIcon>
                 <RecentActors />
               </ListItemIcon>
@@ -237,20 +290,28 @@ function HomePage() {
   // Remove this const when copying and pasting into your project.
   // const container = window !== undefined ? () => window().document.body : undefined;
 
+
+
   return (
     
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", }}>
         <ToastContainer/>
       <CssBaseline />
       <AppBar
         position="fixed"
+        
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
+          backgroundColor: 'white',
+          boxShadow: '0px 0px 0px gray',
+          color: 'black'
+          
         }}
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Divider
+          <Box sx={{display:'flex'}}>
+             <Divider
             variant="horizontal"
             sx={{ display: { xs: "none", sm: "inline-block" } }}
           />
@@ -264,16 +325,35 @@ function HomePage() {
             <MenuIcon />
           </IconButton>
           <Typography
-            sx={{ display: { sm: "none" } }}
+            
+            sx={{
+              display: { sm: "none" },
+             /* ...styles.text,*/
+              //fontFamily: "Playfair Display",
+              fontFamily: "Great Vibes",
+              fontSize: "25px",
+              textAlign: 'left',
+              left:0,
+              //fontWeight: "bold",
+              //textShadow: `2px 2px 5px ${ICONS_COLOR}`,
+                textShadow: `2px 2px 5px ${blue[900]}`,
+              width:'50px',
+              color: 'white',
+                textDecoration: 'underline',
+                //backgroundColor: blue[700],
+                borderRadius: '10px',
+                padding:'1px'
+            }}
             variant="h6"
             noWrap
             component="div"
           >
-            BLOG-PRO
+            Bp
           </Typography>
+          </Box>
+         
 
           <Box sx={{ flexGrow: 0 }}>
-            {`${user?.displayName || user?.email} - `}
             <Tooltip title="Vos paramètres">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt={user?.displayName || "Inconnu"} src={user?.photoURL} />
@@ -296,9 +376,10 @@ function HomePage() {
               onClose={handleCloseUserMenu}
             >
               
-              <MenuItem key={'compte'} onClick={handleCloseUserMenu} sx={{display:'flex', justifyContent:'space-between'}}>
-              <Typography textAlign="center">votre Compte</Typography>
-                <AccountBox/>
+              <MenuItem key={'compte'} onClick={handleCloseUserMenu} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <RouterLink style={{display: "flex", justifyContent:'space-between',textDecoration:'none', width:'100%', color:'black'}} to={'user'} ><Typography  textAlign="center">votre Compte</Typography>
+                <AccountBox/></RouterLink>
+              
                  
               </MenuItem>
               <MenuItem key={'logOut'} onClick={disconnectUser} sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -314,8 +395,8 @@ function HomePage() {
       </AppBar>
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="mailbox folders"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 }}}
+        //aria-label="mailbox folders"
       >
         {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
         <Drawer
@@ -324,6 +405,7 @@ function HomePage() {
           open={mobileOpen}
           onTransitionEnd={handleDrawerTransitionEnd}
           onClose={handleDrawerClose}
+          onClick={handleDrawerClose}
           ModalProps={{
             keepMounted: true, // Better open performance on mobile.
           }}
@@ -332,6 +414,7 @@ function HomePage() {
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,
+              //border:'2px solid yellow'
             },
           }}
         >
@@ -344,9 +427,11 @@ function HomePage() {
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,
+              border:'0px solid yellow'
             },
           }}
           open
+          
         >
           {drawer}
         </Drawer>
@@ -358,31 +443,43 @@ function HomePage() {
           backgroundColor: "black",
           minHeight: "100vh",
           color: "wheat",
-          p: 1,
+         // p: 1,
           width: { sm: `calc(100% - ${drawerWidth}px)`  },
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
-          gap: 1,
-          justifyContent:'space-between'
+         // gap: 1,
+          justifyContent: 'space-between',
+         
         }}
       >
         <Toolbar sx={{ display: { md: "none" } }} />
-        <Box sx={{ width: { xs: "100%", md: "75%" }, backgroundColor:'ButtonFace', color: 'black', flex:1 }}>
-          <Toolbar sx={{ display: { xs: "none", md: "block" } }} />
-
-          {/*reservé aux enfants */}
+        <Box sx={{ width: { xs: "100%", sm:'100%', md: "40%", ...styles.flexCenter }, backgroundColor:'white',mt:{md: '64px', xs:0}, color: 'black', flex:1 }}>
+          <Toolbar sx={{ display: { xs: "none", sm:'none', md: "block" } }} />
+          <Stack /*justifyContent='center' alignItems='center'*/ width={{ xs: "100%", sm: '100%', md: "50%" }} minHeight={{ xs: '100% ', sm: '100%', md: '85vh' }} sx={{/* position: { sm: 'relative', xs:'relative'},*/ border:'0px solid black', p:2, }}>
+            {/*reservé aux enfants */}
           <Outlet />
+          </Stack>
+          
         </Box>
         <Box
           sx={{
-            display: { xs: "none", md: "inline-block" },
+            display: { xs: "none", sm:'none', md: "flex" },
             width: { md: "25%" },
-            backgroundColor: 'whitesmoke',
-            minHeight:'95vh'
+            backgroundColor: 'white',
+           minHeight:'91vh',
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            color: blue[500],
+            textAlign: 'center',
+            gap:1
+            
           }}
         >
           <Toolbar sx={{ display: { xs: "none", md: "block" }}} />
-          vous laisserez vos remarques et suggestions ici
+          
+          <TextareaAutosize placeholder="Des suggestions?" name="comment" style={{ width: '80%',marginTop:'50px', height: '200px', fontFamily: 'Open Sans, Time New Roman', fontSize:'20px' }}/>
+          <Button endIcon={<Send/>} variant="contained">Envoyé </Button>
         </Box>
       </Box>
     </Box>

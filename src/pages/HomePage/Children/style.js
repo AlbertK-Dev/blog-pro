@@ -43,14 +43,30 @@ const styles = {
         justifyContent:'center',
     },
     avatar: {
-        width: 100,
-        height: 100,
+        width: 200,
+        height: 200,
         border: `2px solid ${ICONS_COLOR}`
     },
     flexCenter: {
         display: 'flex',
         alignItems: 'center',
         justifyContent:'center',
+    },
+    fab: {
+        xs: {
+            position: "fixed",
+        bottom: '12px',
+        right: '12px',
+        },
+        sm: {
+            position: "absolute",
+            top: '100px',
+            left: '300px',
+            
+        }
+
+        
+
     }
 }
 
