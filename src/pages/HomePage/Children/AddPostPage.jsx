@@ -14,6 +14,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { pActions } from '../../../redux/posts/postsSlice';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { addDoc, collection, doc, serverTimestamp } from 'firebase/firestore';
+import validFileType from '../../../utlis/images/ValidateFileType';
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -55,15 +57,17 @@ function AddPostPage() {
     const content = useSelector((state) => state.posts.currentAddPostData?.content);
     const tags = useSelector((state) => state.posts.currentAddPostData.tags);
     const currentTag = useSelector((state) => state.posts.currentAddPostData.currentTag);
+    
    
     const dispach = useDispatch()
 
     const [publication, setPublication] = useState(false)
+    const navigate = useNavigate()
 
     const onSmallDevice = innerWidth <= 500;
     const onMediumDevice = innerWidth <= 940;
     const defaultPostImgLink = './postImgDefault.jpg';
-
+ 
  
 
     const VisuallyHiddenInput = styled("input")({
@@ -81,8 +85,26 @@ function AddPostPage() {
 
     const handlecreatePost = async () => {
         setPublication(true)
-        const createPostToast = toast.loading('publication en cours...',{position:'top-right'})
+        const createPostToast = toast.loading('publication en cours...', { position: 'top-right' })
         try {
+            
+            if (title === null || title === '' || title === undefined) {
+                throw new Error('Veuillez définir un titre!')
+                
+            }
+            if (content === null || content === '' || content === undefined ) {
+                throw new Error('Veuillez définir un contenu!')
+                
+            }
+
+            if (title.length < 5) {
+                throw new Error('le titre doit contenir au moins 05 caractères')
+                
+            }
+            if (content.length < 15) {
+                throw new Error('le contenu doit avoir au moins 15 caractères')
+                
+            }
              let imgURL = ''
             const userImagePostRef = ref(storage, `users/${user.uid}/posts/${user.uid.concat(title.toLowerCase().replace(/\s+/g, ""))}/images/principal`)
             if (postImgfile === null || postImgfile === undefined) {
@@ -140,14 +162,7 @@ function AddPostPage() {
         const authorId = user.uid;
         const creationDate = serverTimestamp();
             const updateDate = serverTimestamp();
-            if (title == null) {
-                throw new Error('Veuillez définir un titre!')
-                
-            }
-            if (content == null) {
-                throw new Error('Veuillez définir un contenu!')
-                
-            }
+            
 
         const postData = {
             title,
@@ -174,7 +189,9 @@ function AddPostPage() {
             
         })
             
-        dispach(pActions.resetCurrentAddPostData())
+            dispach(pActions.resetCurrentAddPostData())
+            navigate(-1)
+            
             
         } catch (error) {
             console.log(error)
@@ -210,7 +227,13 @@ function AddPostPage() {
         >
             <Box>
                 <RouterLink to={-1} >
-                    <Fab color='primary' sx={onSmallDevice || onMediumDevice ? { } : { ...styles.fab.sm, position:'fixed' }}> <ArrowBack /> </Fab>
+                    <Fab color='primary' sx={{
+            position: {xs: 'fixed',sm: 'fixed', md:'fixed'},
+            top: {sm:'100px',md: '100px'},
+            left: {sm: '205px', md:'300px'},
+            bottom: {xs:"12px", sm:''},
+            right: {xs:'12px', sm:''},
+                }}> <ArrowBack /> </Fab>
             </RouterLink>
             <Box> {/** title */}
                 <ToastContainer limit={2} />
@@ -262,6 +285,11 @@ function AddPostPage() {
                                 if (e.target.files.length === 0) {
                                     toast.error('Selectionnez une image!', { position: 'top-right', autoClose: 1000 })
                                     return;
+                                }
+                                if (validFileType(e.target.files[0]) === false) {
+                                    toast.error(`formet d'image inconnu!`, { position: 'top-right', autoClose: 1000 })
+                                    return;
+                                    
                                 }
                                 
                                 dispach(pActions.updateCurrentAddPostData({postImgfile: e.target.files[0]}))
@@ -336,6 +364,10 @@ function AddPostPage() {
                     <Box display={'flex'}>{/**input bar */}
                         <TextField size='small' label={'Ajouter des étiquettes pour faciliter la recherche'} disabled={tags.length >= MAX_TAGS} name='currentTag' value={currentTag} fullWidth onChange={(e) => dispach(pActions.updateCurrentAddPostData({ currentTag: e.target.value }))} />
                         <IconButton color='primary' disabled={tags.length >= MAX_TAGS} onClick={() => {
+
+                            if (currentTag === '') {
+                                return;
+                            }
                             dispach(pActions.updateCurrentAddPostData({ tags: [...tags, currentTag] }))
                             dispach(pActions.updateCurrentAddPostData({ currentTag: '' }))
                         }}><Add /> </IconButton>
@@ -367,6 +399,11 @@ function AddPostPage() {
                                 if (e.target.files.length === 0) {
                                     toast.error('Selectionnez une image!', { position: 'top-right', autoClose: 1000 })
                                     return;
+                                }
+                                if (validFileType(e.target.files[0]) === false) {
+                                    toast.error(`formet d'image inconnu!`, { position: 'top-right', autoClose: 1000 })
+                                    return;
+                                    
                                 }
                                
                                 dispach(pActions.updateCurrentAddPostData({otherImageTemp: e.target.files[0]}))

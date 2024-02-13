@@ -106,7 +106,7 @@ function HomePage() {
             ...styles.text,
             //fontFamily: "Playfair Display",
             fontFamily: "Great Vibes",
-            fontSize: "40px",
+            fontSize: {xs:"40px", sm:'30px', md:'40px'},
             //fontWeight: "bold",
             //textShadow: `2px 2px 5px ${ICONS_COLOR}`,
             textShadow: `2px 2px 5px ${blue[600]}`,
@@ -426,7 +426,7 @@ function HomePage() {
             display: { xs: "none", sm: "block" },
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
-              width: drawerWidth,
+              width: {md:`${drawerWidth}px`, sm:`${drawerWidth - 40}px`},
               border:'0px solid yellow'
             },
           }}
@@ -453,7 +453,7 @@ function HomePage() {
         }}
       >
         <Toolbar sx={{ display: {sm:'none', md: "none" } }} />
-        <Box sx={{ width: { xs: "100%", sm:'100%', md: "50%", ...styles.flexCenter, alignContent:{sm:'flex-end', md:'center' } }, backgroundColor:'white',mt:{md: '64px',sm:'64px', xs:0}, color: 'black', flex:1 }}>
+        <Box sx={{ width: { xs: "100%", sm:'100%', md: "50%", ...styles.flexCenter, alignContent:{sm:'center', md:'center' } }, backgroundColor:'white',mt:{md: '64px',sm:'64px', xs:0}, color: 'black', flex:1 }}>
           <Toolbar sx={{ display: { xs: "none", sm:'block', md: "block" } }} />
           <Stack /*justifyContent='center' alignItems='center'*/ width={{ xs: "100%", sm: '90%', md: "60%" }} minHeight={{ xs: '100% ', sm: '100%', md: '85vh' }} sx={{/* position: { sm: 'relative', xs:'relative'},*/ border:'0px solid black', p:2, }}>
             {/*reservé aux enfants */}

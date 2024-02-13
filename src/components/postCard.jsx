@@ -9,7 +9,7 @@ import CardActions from '@mui/material/CardActions';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { grey, red } from '@mui/material/colors';
+import { grey} from '@mui/material/colors';
 //import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 //import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -42,7 +42,7 @@ export default function PostCard({ userAvatar, userPseudo, creationDate, princip
     <Card sx={{ maxWidth: '100%' }}>
       <CardHeader
         avatar={
-                  <Avatar src={userAvatar} alt={userPseudo} sx={{ bgcolor: red[500] }} />       
+                  <Avatar src={userAvatar} alt={userPseudo} sx={{ bgcolor: 'skyblue' }} />       
            
         }
         action={

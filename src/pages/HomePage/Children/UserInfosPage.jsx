@@ -32,6 +32,7 @@ import {  doc, onSnapshot, setDoc } from "firebase/firestore";
 import { useDispatch } from "react-redux";
 import { uActions } from "../../../redux/user/userSlice";
 import { useLoaderData, Link as RouterLink } from "react-router-dom";
+import validFileType from "../../../utlis/images/ValidateFileType";
 
 
 const auth = getAuth(app);
@@ -204,7 +205,17 @@ function UserInfosPages() {
             autoClose: 1000,
             
           })
-        } else {
+        } else if (validFileType(file) === false) {
+          
+          toast.update(toastID, {
+            type: 'error',
+            isLoading: false,
+            render: `format d'image non-reconnu`,
+            autoClose: 1000,
+            
+          })
+        }
+        else {
          await uploadBytes(userProfilePhotoRef, file);
           console.log("image envoyé");
           photoURL = await getDownloadURL(userProfilePhotoRef);

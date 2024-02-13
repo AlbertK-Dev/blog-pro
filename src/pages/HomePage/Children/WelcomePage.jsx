@@ -141,7 +141,7 @@ function WelcomePage() {
           <Fab color='primary' sx={{
             position: {xs: 'fixed',sm: 'fixed', md:'fixed'},
             top: {sm:'100px',md: '100px'},
-            left: {sm: '245px', md:'300px'},
+            left: {sm: '205px', md:'300px'},
             bottom: {xs:"12px", sm:''},
             right: {xs:'12px', sm:''},
                 }}> <Add/> </Fab>
