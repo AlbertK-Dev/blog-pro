@@ -139,11 +139,11 @@ function WelcomePage() {
         <Stack spacing={1} >
             <RouterLink to={'addpost'}>
           <Fab color='primary' sx={{
-            position: (onSmallDevice && 'fixed') || (!onSmallDevice && onMediumDevice && 'relative') || (!onSmallDevice && !onMediumDevice && 'fixed'),
-            top: (onSmallDevice && '') || (!onSmallDevice && onMediumDevice  && '') || (!onSmallDevice && !onMediumDevice && '100px'),
-            left: (onSmallDevice && '') || (!onSmallDevice && onMediumDevice && '') || (!onSmallDevice && !onMediumDevice && '300px'),
-            bottom: (onSmallDevice && '12px') || (!onSmallDevice && onMediumDevice && '') || '',
-            right: (onSmallDevice && '12px') || (!onSmallDevice && onMediumDevice && '') || '',
+            position: {xs: 'fixed',sm: 'fixed', md:'fixed'},
+            top: {sm:'100px',md: '100px'},
+            left: {sm: '245px', md:'300px'},
+            bottom: {xs:"12px", sm:''},
+            right: {xs:'12px', sm:''},
                 }}> <Add/> </Fab>
         </RouterLink>
 

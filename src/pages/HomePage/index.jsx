@@ -175,7 +175,7 @@ function HomePage() {
               <ListItemIcon>
                 <Public />
               </ListItemIcon>
-              <ListItemText primary="Vos posts" />
+              <ListItemText primary="Mes Publications" />
             </ListItemButton>
           </ListItem>
         </NavLink>
@@ -377,7 +377,7 @@ function HomePage() {
             >
               
               <MenuItem key={'compte'} onClick={handleCloseUserMenu} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <RouterLink style={{display: "flex", justifyContent:'space-between',textDecoration:'none', width:'100%', color:'black'}} to={'user'} ><Typography  textAlign="center">votre Compte</Typography>
+              <RouterLink style={{display: "flex", justifyContent:'space-between',textDecoration:'none', width:'100%', color:'black'}} to={'user'} ><Typography  textAlign="center">Mon Compte</Typography>
                 <AccountBox/></RouterLink>
               
                  
@@ -446,16 +446,16 @@ function HomePage() {
          // p: 1,
           width: { sm: `calc(100% - ${drawerWidth}px)`  },
           display: "flex",
-          flexDirection: { xs: "column", md: "row" },
+          flexDirection: { xs: "column", sm:'row', md: "row" },
          // gap: 1,
           justifyContent: 'space-between',
          
         }}
       >
-        <Toolbar sx={{ display: { md: "none" } }} />
-        <Box sx={{ width: { xs: "100%", sm:'100%', md: "40%", ...styles.flexCenter }, backgroundColor:'white',mt:{md: '64px', xs:0}, color: 'black', flex:1 }}>
-          <Toolbar sx={{ display: { xs: "none", sm:'none', md: "block" } }} />
-          <Stack /*justifyContent='center' alignItems='center'*/ width={{ xs: "100%", sm: '100%', md: "50%" }} minHeight={{ xs: '100% ', sm: '100%', md: '85vh' }} sx={{/* position: { sm: 'relative', xs:'relative'},*/ border:'0px solid black', p:2, }}>
+        <Toolbar sx={{ display: {sm:'none', md: "none" } }} />
+        <Box sx={{ width: { xs: "100%", sm:'100%', md: "50%", ...styles.flexCenter, alignContent:{sm:'flex-end', md:'center' } }, backgroundColor:'white',mt:{md: '64px',sm:'64px', xs:0}, color: 'black', flex:1 }}>
+          <Toolbar sx={{ display: { xs: "none", sm:'block', md: "block" } }} />
+          <Stack /*justifyContent='center' alignItems='center'*/ width={{ xs: "100%", sm: '90%', md: "60%" }} minHeight={{ xs: '100% ', sm: '100%', md: '85vh' }} sx={{/* position: { sm: 'relative', xs:'relative'},*/ border:'0px solid black', p:2, }}>
             {/*reservé aux enfants */}
           <Outlet />
           </Stack>
@@ -464,7 +464,28 @@ function HomePage() {
         <Box
           sx={{
             display: { xs: "none", sm:'none', md: "flex" },
-            width: { md: "25%" },
+            width: { md: "20%" },
+            backgroundColor: 'white',
+           minHeight:'91vh',
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            color: blue[500],
+            textAlign: 'center',
+            gap: 1,
+            position: 'fixed',
+            right:0
+            
+          }}
+        >
+          <Toolbar sx={{ display: { xs: "none",sm:"block", md: "block" }}} />
+          
+          <TextareaAutosize placeholder="Des suggestions?" name="comment" style={{ width: '80%',marginTop:'50px', height: '200px', fontFamily: 'Open Sans, Time New Roman', fontSize:'20px' }}/>
+          <Button endIcon={<Send/>} variant="contained">Envoyé </Button>
+        </Box>
+        <Box sx={{
+            display: { xs: "none", sm:'none', md: "flex" },
+            width: { md: "20%" },
             backgroundColor: 'white',
            minHeight:'91vh',
             flexDirection: 'column',
@@ -474,13 +495,7 @@ function HomePage() {
             textAlign: 'center',
             gap:1
             
-          }}
-        >
-          <Toolbar sx={{ display: { xs: "none", md: "block" }}} />
-          
-          <TextareaAutosize placeholder="Des suggestions?" name="comment" style={{ width: '80%',marginTop:'50px', height: '200px', fontFamily: 'Open Sans, Time New Roman', fontSize:'20px' }}/>
-          <Button endIcon={<Send/>} variant="contained">Envoyé </Button>
-        </Box>
+          }}></Box>
       </Box>
     </Box>
   );

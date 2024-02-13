@@ -35,8 +35,7 @@ export default function PostCard({ userAvatar, userPseudo, creationDate, princip
 //     setExpanded(!expanded);
     //   };
     
-    console.log('props', userAvatar, userPseudo, creationDate, principalImage, content, title, isOffline)
-
+  
   
   
   return (
@@ -51,8 +50,9 @@ export default function PostCard({ userAvatar, userPseudo, creationDate, princip
             <MoreVertIcon />
           </IconButton>
         }
-        title={title}
-        subheader={creationDate}
+        title={`${title} `}
+        subheader={` \u{270D} ${userPseudo} --- ${creationDate}`}
+        
           />
           <CardActionArea onClick={()=> {alert("Ouverture des détailles...prochainement")}}> 
           
