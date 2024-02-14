@@ -5,8 +5,7 @@ import {
   ReportProblem,
   ArrowBackIos,
   LockPerson,
-  Send,
-  Autorenew
+  Send
   
  
 } from "@mui/icons-material";
@@ -17,21 +16,23 @@ import {
   Typography,
   InputAdornment,
   Button,
- 
+  Tooltip,
 
 } from "@mui/material";
 import { blueGrey, grey, red } from "@mui/material/colors";
-import {  Link as RouterLink } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import styles from "./style";
-
+import { useDimensions } from "../../hooks/useDimensions";
 import { useFormik } from "formik";
 import {
- 
+  GoogleAuthProvider,
   getAuth,
- 
+  isSignInWithEmailLink,
+  linkWithRedirect,
   sendPasswordResetEmail,
- 
+  signInWithEmailAndPassword,
+  signInWithEmailLink,
 
 } from "firebase/auth";
 import app from "../../firebase/config";
@@ -43,79 +44,76 @@ import { blue } from "@mui/material/colors";
 
 
 const auth = getAuth(app);
+const signIn = (email, password) =>
+  signInWithEmailAndPassword(auth, email, password);
 
-const setLink = async (email) => {
-  const actionCodeSettings = {
-    url: `${window.location.protocol}//${window.location.host}/login`,
-    handleCodeInApp: true,
-  };
-  console.log(actionCodeSettings, window.location.href, window.location.protocol)
-  
-  await sendPasswordResetEmail(auth, email, actionCodeSettings);
- 
-}
 
-function Timer({end = 60, onTimerComplete}) {
- const  [time, setTime] = useState(end)
-
-  useEffect(() => {
-    const myInterval = setInterval(() => setTime(time - 1), 600)
-
-    return () => clearInterval(myInterval);
-  },[time])
-  
-  if (time === 0) {
-    
-    onTimerComplete()
-  }
-
-  return (
-    <>
-      <Box component={'div'} sx={{display: 'inline-block', textAlign:'center',width:'16px', height:'16px', borderRadius:'100%', backgroundColor:'#f5f5f5', border:'2px solid black', padding:'5px'}}>
-        {time}
-      </Box>
-    </>
-  )
-  
-}
 
 function ResetPassword() {
   //!utile pour la mise en page du travail
 
-  
+  const { innerWidth } = useDimensions();
   const [signinError, setSigninError] = useState("");
   const [emailError, setEmailError] = useState('');
-  const [emailAlreadySend, setEmailAlreadySend] = useState(false);
-  const [emailValue, setEmailValue] = useState('');
-  const [timerComplete, setTimerComplete] = useState(false);
-  const [timerTime, setTimerTime] = useState(10)
-  
 
- 
- 
+  const onSmallDevice = innerWidth <= 500;
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!isSignInWithEmailLink(auth, window.location.href)) {
+      return;
+    }
+    let email = window.localStorage.getItem("emailForSignIn");
+    if (!email) {
+      email = prompt("Veuillez saisir votre email pour la confirmation");
+    }
 
+    signInWithEmailLink(auth, email, window.location.href)
+    .then(() => {
+      window.localStorage.removeItem("emailForSignIn");
+      linkWithRedirect(auth.currentUser, new GoogleAuthProvider()).catch(
+        (error) => {
+          setSigninError(
+            `erreur linking with redirect ${
+                  error.code || error.message || error.statusText
+                }`
+          );
+          toast.error(signinError, {
+            position: "top-right",
+          });
+        }
+      );
+      toast.success("connexion réussi ", {
+        delay: 1000,
+        position:'top-right'
+      });
+      window.location.reload();
+    })
+    .catch((error) =>
+      setSigninError(
+        `erreur signin with email link ${
+              error.code || error.message || error.statusText
+            }`
+      )
+    );
+  }, [signinError]);
 
   async function loginUser(formValues) {
     //TODO code pour Connecter l'utilisateur
     try {
-
-       await setLink(formValues.email)
-     
+      const actionCodeSettings = {
+        url: `${window.location.protocol}//${window.location.host}/login`,
+        handleCodeInApp: true,
+      };
+      console.log(actionCodeSettings, window.location.href, window.location.protocol)
+      await sendPasswordResetEmail(auth, formValues.email, actionCodeSettings);
+    
       toast.success("succès", {
-        position: 'top-right',
-        autoClose: 300,
+        position: "top-center",
       });
-       setEmailAlreadySend(true)
       
     } catch (error) {
-      
-      if (error.code === 'auth/missing-email') {
-        setEmailError('veuillez Saisir votre adresse email!')
-        setSigninError('')
-        return;
-      }
-      if (error.code === 'auth/invalid-email' ) {
+      if (error.code === 'auth/invalid-email') {
         setEmailError('le format de votre adresse email n\'est pas valide.')
         setSigninError('')
         return;
@@ -130,7 +128,7 @@ function ResetPassword() {
   //? Préparons le térrain pour formik
   const initialValues = {
     email: "",
-    
+    password: "",
   };
 
   const formik = useFormik({
@@ -148,10 +146,10 @@ function ResetPassword() {
         
         sx={{
           ...styles.box,
-          transform: {xs:"scale(0.9,1)", sm : "scale(1,1)"},
-          marginTop: {xs:"10px", sm: null},
-          width:  {xs:"100%", sm : 400},
-          height:{xs:'100%', sm:'auto'},
+          transform: onSmallDevice ? "scale(0.9,1)" : "scale(1,1)",
+          marginTop: onSmallDevice ? "10px" : null,
+          width: onSmallDevice ? "100%" : 400,
+          height:'100%',
           border: "0px solid gray",
           padding: "20px",
           //backgroundColor: '#ddd',
@@ -189,10 +187,9 @@ function ResetPassword() {
            // textShadow: `2px 2px 5px blue`,
             color: blueGrey[500],
             //textDecoration: 'underline'
-            textAlign:'center'
           }}
         >
-          {emailAlreadySend === true? 'Consultez-votre boite de méssagerie!' :'Mot de passe Oublié ?'}
+          Mot de passe Oublié ?
         </Typography>
         <form  id='signinForm' onSubmit={formik.handleSubmit}>
           <Box sx={{ ...styles.center, flexDirection: "column", gap: "2px" }}>
@@ -210,22 +207,15 @@ function ResetPassword() {
                 
               }}
             >
-              {
-                emailAlreadySend === true ? `un lien de réinitialisation de mot de passe vient d'etre envoyé à ${emailValue} ouvrer votre boite de messagerie et cliquer sur le lien`:
-
-                'nous allons vous envoyé un lien de réinitialiasation de mot de passe, veuillez renseigné votre adresse email et cliquer sur envoyer'
-              }
+              nous allons vous envoyé un lien de réinitialiasation de mot de passe, veuillez renseigné votre adresse email et cliquer sur envoyer
             </Typography>
           </Box>
-
-          {emailAlreadySend === false && <>
-            <Box sx={{ ...styles.boxField, alignItems: "baseline" }}>
+          <Box sx={{ ...styles.boxField, alignItems: "baseline" }}>
             <TextField
               error={emailError}
               size='large'
               onChange={(e) => {
                 setEmailError('');
-                setEmailValue(e.target.value);
                
                 formik.handleChange(e)
               }}
@@ -259,23 +249,31 @@ function ResetPassword() {
           <Typography variant="body2" sx={{ color: "red", mt:0 }}>
               {emailError}
             </Typography>
-          </>  }
-          
 
 
 
-          <Box sx={{
-            ...styles.boxField,
-            alignItems: "baseline",
-            flexDirection: "column",
-            mt:3
-          }} />
+          <Box
+            sx={{
+              ...styles.boxField,
+              alignItems: "baseline",
+              flexDirection: "column",
+              mt:3
+            }}
+          >
+            
+           
+          </Box>
 
           <Typography variant="body2" sx={{ color: "red", mt:1 }}>
               {signinError}
             </Typography>
 
-          
+          <Tooltip
+            title={
+              (!formik.isValid && "tous les champs ne sont pas valides") ||
+              (formik.isSubmitting && "validation en cours...")
+            }
+          >
             <Box
               sx={{
                 display: "flex",
@@ -291,82 +289,27 @@ function ResetPassword() {
                 variant="outlined"
                   sx={{  borderRadius: '20px'}} >Retour</Button>
             </RouterLink>
-            {emailAlreadySend === false && <Button
-              id="connect-button"
-              color="primary"
-              endIcon={<Send />}
-              disableElevation
-              variant="contained"
-              sx={{ borderRadius: '20px', width: '50%' }}
-              type="submit"
-              disabled={!formik.isValid || formik.isSubmitting}
-            >
-              envoyer
-            </Button>}
-            {emailAlreadySend  && <Button
-              id="connect-button"
-              color="primary"
-              endIcon={<Autorenew />}
-              disableElevation
-              variant="contained"
-              sx={{ borderRadius: '20px', width: '50%', fontSize:'10px' }}
-              onClick={() => { setEmailAlreadySend(false);  setTimerComplete(false)}}
-              type="button"
-                
-            >
-              Ce n'était pas vous?
-            </Button>}    
-          </Box>
-
-
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignContent:'center', gap:2, mt:2, width: '100%'}}>
-            {emailAlreadySend && timerComplete === false ?
-              <Timer  end={timerTime} onTimerComplete={() => setTimerComplete(true)} /> : null}
-          {emailAlreadySend && timerComplete && <Button
-              id="connect-button"
-              color="primary"
-              endIcon={<Send />}
-            disableElevation
-            fullWidth
-              variant="contained"
-              sx={{ borderRadius: '20px', width: {sm:'100%', xs:'100%'} , mt:{xs:2, sm:3}}}
-              type="button"
-              onClick={async () => {
-                try {
-                
-               setTimerTime(timerTime + 10);
-                   
-                  await setLink(emailValue)
-     
-                  toast.success("succès", {
-                    position: 'top-right',
-                    autoClose: 300,
-                  });
-                  setTimerComplete(false)
-                   setEmailAlreadySend(true)
-                
-                } catch (error) {
-                  setSigninError(error.code)
-                }
-                
-              }
-              
-                
-              } 
-              
-            >
-              re-envoyer le lien
-            </Button>}
-          </Box>
-          
+              <Button
+                id="connect-button"
+                color="primary"
+                endIcon={<Send/>}
+                disableElevation
+                variant="contained"
+                sx={{  borderRadius:'20px', width:'50%' }}
+                type="submit"
+                disabled={!formik.isValid || formik.isSubmitting}
+              >
+                envoyer
+              </Button>
+             
+            </Box>
            
-         
+          </Tooltip>
         </form>
 
    
       
       </Box>
-      
     </Stack>
   );
 }

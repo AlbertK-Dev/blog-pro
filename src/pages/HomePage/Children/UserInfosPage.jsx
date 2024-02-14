@@ -269,7 +269,7 @@ function UserInfosPages() {
       toast.update(toastId, {
         render: "Pseudo modifié avec succès!",
         isLoading: false,
-        autoClose: 2000,
+        autoClose: 1000,
         type:'success'
         
       });

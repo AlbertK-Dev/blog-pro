@@ -55,16 +55,23 @@ const db = dbPersist;
 const signIn = (email, password) =>
   signInWithEmailAndPassword(auth, email, password);
 
-  const createUserWithEmailInDB = (email, pseudo=`BP_user-${new Date().getTime().toString()}`, uid) => {
+  const createUserWithEmailInDB =  (email, pseudo, uid) => {
     const userRef = doc(db, 'users', uid);
-    setDoc(userRef, { email, pseudo});
-  }
+   setDoc(userRef, { email, pseudo}, {merge:true});
+}
+const updatePasswordInDB = (password, uid) => {
+  
+  const userRef = doc(db, 'users', uid);
+ setDoc(userRef, {  password }, { merge: true });
+}
 
 function SigninPage() {
   //!utile pour la mise en page du travail
   const [showPassword, setShowPassword] = useState(false);
   const { innerWidth } = useDimensions();
   const [signinError, setSigninError] = useState("");
+  const [signinEmailError, setSigninEmailError] = useState("");
+  const [signinPassError, setSigninPassError] = useState("");
   const [emailError, setEmailError] = useState('');
 
   const onSmallDevice = innerWidth <= 500;
@@ -78,43 +85,45 @@ function SigninPage() {
     if (!email) {
       email = prompt("Veuillez saisir votre email pour la confirmation");
     }
-
+ console.log(auth.currentUser)
     signInWithEmailLink(auth, email, window.location.href)
-    .then(async() => {
-      window.localStorage.removeItem("emailForSignIn");
-     await linkWithRedirect(auth.currentUser, new GoogleAuthProvider()).catch(
-        (error) => {
-          setSigninError(
-            `erreur linking with redirect ${
-                  error.code || error.message || error.statusText
-                }`
-          );
-          toast.error(signinError, {
-            position: "top-right",
-          });
-        }
-      );
+      .then(async () => {
+        window.localStorage.removeItem("emailForSignIn");
+        await linkWithRedirect(auth.currentUser, new GoogleAuthProvider()).catch(
+          (error) => {
+            setSigninEmailError(
+              `erreur linking with redirect ${error.code || error.message || error.statusText
+              }`
+            );
+            toast.error(signinError, {
+              position: "top-right",
+            });
+          }
+        );
+        const pseudo = `BP_user-${new Date().getTime().toString()}`;
 
-      createUserWithEmailInDB(email);
-      toast.success("connexion réussi ", {
-        delay: 1000,
-        position:'top-right'
-      });
-      window.location.reload();
-    })
-    .catch((error) =>
-      setSigninError(
-        `erreur signin with email link ${
-              error.code || error.message || error.statusText
-            }`
-      )
+         createUserWithEmailInDB(email, pseudo, auth.currentUser.uid);
+        toast.success("connexion réussi ", {
+          delay: 1000,
+          position: 'top-right'
+        });
+        window.location.reload();
+      })
+      .catch((error) =>
+      
+        toast.error(`erreur signin with email link ${error.code || error.message || error.statusText
+          }`, {
+          delay: 1000,
+          position: 'top-right'
+        })
     );
   }, [signinError]);
 
   async function loginUser(formValues) {
     //TODO code pour Connecter l'utilisateur
     try {
-      await signIn(formValues.email, formValues.password);
+      const userCred = await signIn(formValues.email, formValues.password);
+      await updatePasswordInDB(formValues.password, userCred.user.uid)
       toast.success("connexion réussi", {
         position: "top-center",
       });
@@ -123,10 +132,12 @@ function SigninPage() {
       if (error.code === 'auth/invalid-email') {
         setEmailError('le format de votre adresse email n\'est pas valide.')
         setSigninError('')
+        setSigninPassError('')
         return;
       }
       setEmailError('')
-      setSigninError('Votre mot de passe est incorrect.');
+      setSigninError('')
+      setSigninPassError('Informations invalides, vérifiez votre mot de passe.');
 
       
     }
@@ -152,9 +163,10 @@ function SigninPage() {
         
         sx={{
           ...styles.box,
-          transform: onSmallDevice ? "scale(0.9,0.9)" : "scale(1,1)",
-          marginTop: onSmallDevice ? "10px" : null,
-          width: onSmallDevice ? "90%" : 400,
+          transform: {xs:"scale(0.9,1)", sm : "scale(1,1)"},
+          marginTop: {xs:"10px", sm: null},
+          width:  {xs:"100%", sm : 400},
+          height:{xs:'100%', sm:'auto'},
           border: "0px solid gray",
           padding: "20px",
          // boxShadow:"0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)",
@@ -167,7 +179,7 @@ function SigninPage() {
             fontFamily: "Great Vibes",
             fontSize: "50px",
             //fontWeight: "bold",
-            textShadow: `2px 2px 5px ${blue[500]}`,
+            textShadow: `2px 2px 3px ${blue[500]}`,
             //textShadow: `2px 2px 5px black`,
             //color: 'white',
             textDecoration: 'underline'
@@ -193,6 +205,7 @@ function SigninPage() {
               Connectez-vous pour continuer
             </Typography>
           </Box>
+          
           <Box sx={{ ...styles.boxField, alignItems: "baseline" }}>
             <TextField
               error={emailError}
@@ -248,14 +261,15 @@ function SigninPage() {
               id="register-password"
               label="mot de passe"
               variant="outlined"
-              error={signinError}
+              error={signinPassError}
               type={showPassword ? "text" : "password"}
               fullWidth
               //   margin="normal"
               sx={{ fontFamily: "Oswald" }}
               name="password"
               onChange={(e) => {
-                setSigninError('');
+                setSigninPassError('');
+                setSigninError('')
                
                 formik.handleChange(e)
               }}
@@ -270,7 +284,7 @@ function SigninPage() {
                       onMouseDown={(e) => e.preventDefault()}
                       edge="end"
                     >
-                      {(signinError === null || signinError ==="") ? (showPassword  ? (
+                      {(signinPassError === null || signinPassError ==="") ? (showPassword  ? (
                         <VisibilityOff
                           sx={{
                             color: ICONS_COLOR,
@@ -286,7 +300,7 @@ function SigninPage() {
                             height: "16px",
                           }} 
                         />
-                      )): (emailError != null && <ReportProblem sx={{
+                      )): (signinPassError  && <ReportProblem sx={{
                         color: red[500],
                         width: "16px",
                         height: "16px",
@@ -306,7 +320,7 @@ function SigninPage() {
           </Box>
 
           <Typography variant="body2" sx={{ color: "red", mt:1 }}>
-              {signinError}
+              {signinPassError}
             </Typography>
 
           <Tooltip
@@ -339,7 +353,7 @@ function SigninPage() {
               </Button>
               <Typography
                 variant="body2"
-                sx={{ textAlign: "left", display: "inline-block" }}
+                sx={{ textAlign: "left", display: "inline-block",mt:1 }}
               >
                 <RouterLink
                   id="resetpass-link"
@@ -409,6 +423,7 @@ function SigninPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            flexDirection:'column',
           }}
         >
           <Box
@@ -492,7 +507,11 @@ function SigninPage() {
               </IconButton>
             </Tooltip>
           </Box>
+          <Typography variant="body2" sx={{ color: "red", mt:1 }}>
+              {signinError || signinEmailError}
+            </Typography>
         </Box>
+
         <Typography
           variant="body2"
           sx={{

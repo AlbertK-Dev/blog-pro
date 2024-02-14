@@ -51,7 +51,7 @@ const signUp = (email, password) =>
 const updateDisplayName = (pseudo) =>
   updateProfile(auth.currentUser, { displayName: pseudo });
 
-const createUserInDB = (email, pseudo, password, uid) => {
+const createUserInDB =  (email, pseudo, password, uid) => {
   const userRef = doc(db, 'users', uid);
   setDoc(userRef, { email, pseudo, password });
 }
@@ -86,7 +86,7 @@ function SignupPage() {
       try {
         // mise a jour du pseudo
         await updateDisplayName(formValues.pseudo);
-        await createUserInDB(formValues.email, formValues.pseudo, formValues.password, cred.user.uid)
+         createUserInDB(formValues.email, formValues.pseudo, formValues.password, cred.user.uid)
         
       } catch (error) {
         toast.error(error.code);
@@ -95,7 +95,7 @@ function SignupPage() {
       //TODO sauvegarder les informations dans le store et dans la bd
 
        toast.success("compte créer avec succès ");
-        await delay(3000)
+        await delay(500)
       onSubmittingProps.resetForm();
 
       navigate("/");
@@ -142,10 +142,12 @@ function SignupPage() {
         sx={{
           ...styles.box,
 
-          transform: onSmallDevice ? "scale(0.9,0.9)" : "scale(1,1)",
-          marginTop: onSmallDevice ? "10px" : null,
-          width: onSmallDevice ? "90%" : 400,
+          transform: {xs:"scale(0.9,1)", sm : "scale(1,1)"},
+          marginTop: {xs:"10px", sm: null},
+          width:  {xs:"100%", sm : 400},
+          height:{xs:'100%', sm:'auto'},
           border: "0px solid gray",
+          
           padding: "20px",
          // boxShadow:  "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)",
         }}
@@ -158,7 +160,7 @@ function SignupPage() {
             fontFamily: "Great Vibes",
             fontSize: "50px",
             //fontWeight: "bold",
-            textShadow: `2px 2px 5px ${blue[400]}`,
+            textShadow: `2px 2px 3px ${blue[400]}`,
            // textShadow: `2px 2px 5px black`,
            // color: 'white',
             textDecoration: 'underline'

@@ -22,8 +22,9 @@ import SignupPage from "../pages/SignupPage";
 import SigninPage from "../pages/SigninPage";
 import UserInfosPages from "../pages/HomePage/Children/UserInfosPage";
 import AddPostPage from "../pages/HomePage/Children/AddPostPage";
-import {  collection, collectionGroup, doc, getDoc, getDocs} from "firebase/firestore";
+import {  collection, collectionGroup, doc, getDoc, getDocs, setDoc} from "firebase/firestore";
 import ResetPassword from "../pages/ResetPassword";
+import UserPostsPage from "../pages/HomePage/Children/UserPostsPage";
 
 
 
@@ -173,6 +174,7 @@ export const mainRouter = createBrowserRouter([
             loader: async () => {
               const user = await getAuthStatus();
               
+              
               const docRef = doc(db, 'users', user.uid)
               const docu = await getDoc(docRef);
               const userInf = {
@@ -180,7 +182,8 @@ export const mainRouter = createBrowserRouter([
                 uid: user.uid,
                 password: 'invisible'
               }
-              console.log(userInf)
+              await setDoc(docRef, {  pseudo: user.displayName }, { merge: true });
+             
               return userInf
                
 
@@ -190,12 +193,45 @@ export const mainRouter = createBrowserRouter([
           },
           {
             path: "posts",
-            element: (
-              <>
-                <h1>les posts utilisateur</h1>
-                
-              </>
-            ),
+            element: <UserPostsPage />,
+            loader: async () => {
+              const user = await getAuthStatus();
+              if (user === null || user === undefined) {
+                return redirect('/login')
+              }
+              const postsSnap = await getDocs(collection(db, 'users', user.uid, 'posts' ))
+              console.log(postsSnap)
+              
+             
+              const tabPosts = [];
+              
+
+              postsSnap?.forEach((doc) => {
+                const info = doc.data()
+                //  const isOffline = doc.metadata.hasPendingWrites;
+                const isOffline = doc.metadata.fromCache
+                tabPosts.push({
+                    ...info,
+                    pid: doc.id,
+                    creationTime: convertTimeStamp(info.creationDate).time,
+                    creationDate: convertTimeStamp(info.creationDate).date,
+                    updateTime: convertTimeStamp(info.updateDate).time,
+                  updateDate: convertTimeStamp(info.updateDate).date,
+                  completeDate: convertTimeStamp(info.updateDate).completDate,
+                    millisec: convertTimeStamp(info.updateDate).millisec,
+                    isOffline
+        
+                })
+              })
+              if (tabPosts.length === 0) {
+                return user
+              }
+              
+              //filtrons le tableau tabPosts
+              tabPosts.sort((a,b)=> a.millisec - b.millisec).reverse()
+              
+              return { user,tabPosts};
+            },
           },
           {
             path: "dashboard",

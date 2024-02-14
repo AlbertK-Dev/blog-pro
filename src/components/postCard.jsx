@@ -9,13 +9,18 @@ import CardActions from '@mui/material/CardActions';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import SpeedDial from '@mui/material/SpeedDial';
+import SpeedDialIcon from '@mui/material/SpeedDialIcon';
+import SpeedDialAction from '@mui/material/SpeedDialAction';
 import { grey} from '@mui/material/colors';
 //import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 //import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { Comment, ThumbDown, ThumbUp } from '@mui/icons-material';
-import { CardActionArea } from '@mui/material';
+import { Comment, DeleteForever, Edit, ThumbDown, ThumbUp } from '@mui/icons-material';
+import { CardActionArea} from '@mui/material';
+import { getAuth } from 'firebase/auth';
+import app from '../firebase/config';
 
 // const ExpandMore = styled((props) => {
 //   const { expand, ...other } = props;
@@ -28,12 +33,24 @@ import { CardActionArea } from '@mui/material';
 //   }),
 // }));
 
-export default function PostCard({ userAvatar, userPseudo, creationDate, principalImage, content, title, isOffline}) {
+const userActions = [
+  { icon: <DeleteForever />, name: 'Supprimer' },
+  { icon: <Edit />, name: 'Editer' },
+];
+
+const auth = getAuth(app)
+  const user = auth.currentUser
+
+export default function PostCard({userId, userAvatar, userPseudo, creationDate, principalImage, content, title, isOffline}) {
  // const [expanded, setExpanded] = React.useState(false);
 
 //   const handleExpandClick = () => {
 //     setExpanded(!expanded);
-    //   };
+  //   };
+  
+  console.log(userId)
+
+
     
   
   
@@ -90,7 +107,7 @@ export default function PostCard({ userAvatar, userPseudo, creationDate, princip
         </Typography>
               </CardContent>}
               </CardActionArea>
-      {isOffline === false && <CardActions disableSpacing>
+      {isOffline === false && <CardActions sx={{ position:'relative',height: 50, width:'100%', transform: 'translateZ(0px)', flexGrow: 1 }} disableSpacing>
         <IconButton aria-label="like">
           <ThumbUp />
         </IconButton>
@@ -103,6 +120,22 @@ export default function PostCard({ userAvatar, userPseudo, creationDate, princip
         <IconButton aria-label="share">
           <ShareIcon />
         </IconButton>
+
+        {user?.uid === userId && <SpeedDial  
+          icon={<SpeedDialIcon   />}
+          direction='up'
+          sx={{position:'absolute', right:0 , bottom:0, transform:'scale(0.8,0.8)'}}
+          ariaLabel="SpeedDial playground example"
+        >
+          {userActions.map((action) => (
+            <SpeedDialAction
+              key={action.name}
+              icon={action.icon}
+              tooltipTitle={action.name}
+            />
+          ))}
+        </SpeedDial>}
+
               
         {/* <ExpandMore
           expand={expanded}

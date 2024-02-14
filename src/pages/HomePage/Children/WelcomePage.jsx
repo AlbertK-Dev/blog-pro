@@ -40,9 +40,10 @@ function WelcomePage() {
       postCard.principalImage = post.imgURL;
       postCard.isOffLine = post.isOffline
       const user = userList.filter((user) => user.uid === post.authorId)
+      postCard.userId = user[0]?.uid 
       
-      postCard.userPseudo = user[0].pseudo;
-      postCard.userAvatar = user[0].photoURL;
+      postCard.userPseudo = user[0]?.pseudo || `BP_temp-user--${new Date().getTime().toString()}` ;
+      postCard.userAvatar = user[0]?.photoURL;
 
       return postCard
 
@@ -88,6 +89,7 @@ function WelcomePage() {
             userPseudo={postCard.userPseudo}
             isOffline={postCard.isOffLine}
             key={postCard.id}
+            userId={postCard.userId}
           />
         })}
             
