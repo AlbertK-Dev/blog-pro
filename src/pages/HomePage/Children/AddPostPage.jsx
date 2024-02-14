@@ -65,7 +65,7 @@ function AddPostPage() {
     const navigate = useNavigate()
 
     const onSmallDevice = innerWidth <= 500;
-    const onMediumDevice = innerWidth <= 940;
+
     const defaultPostImgLink = './postImgDefault.jpg';
  
  

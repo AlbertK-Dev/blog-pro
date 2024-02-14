@@ -5,33 +5,7 @@ import { uActions } from "./userSlice";
 
 import { pSagaActions } from "../setup/allSagaActions";
 
-// export function* getPreloadingData() {
-//     yield put(uActions.preloadLoading());
-//     const allPseudo = yield readFromFirestore.getAllPseudos();
-//     const allEmail = yield readFromFirestore.getAllEmail();
-//     try {
-//         if (allPseudo.success && allEmail.success) {
-//             yield put(
-//                 uActions.preloadSuccess({
-//                     tabEmail: allEmail.data,
-//                     tabPseudo: allPseudo.data,
-//                 })
-//             );
-//         } else {
-//             yield put(
-//                 uActions.preloadFailed(
-//                     "erreur lors du chargement de la page, vérifier votre connexion Internet"
-//                 )
-//             );
-//         }
-//     } catch (error) {
-//         yield put(
-//             uActions.preloadFailed(
-//                 "erreur lors du chargement de la page, vérifier votre connexion Internet"
-//             )
-//         );
-//     }
-// }
+
 
 function* login(userFormData) {
     console.log("Login user");

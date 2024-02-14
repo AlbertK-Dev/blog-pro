@@ -23,6 +23,8 @@ import SigninPage from "../pages/SigninPage";
 import UserInfosPages from "../pages/HomePage/Children/UserInfosPage";
 import AddPostPage from "../pages/HomePage/Children/AddPostPage";
 import {  collection, collectionGroup, doc, getDoc, getDocs} from "firebase/firestore";
+import ResetPassword from "../pages/ResetPassword";
+
 
 
 
@@ -252,7 +254,7 @@ export const mainRouter = createBrowserRouter([
   },
   {
     path: "/reset-pwd",
-    element: <h1>vous avez cliquez sur reset password?</h1>,
+    element: <ResetPassword/>,
   },
 
   {

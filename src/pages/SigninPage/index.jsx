@@ -5,6 +5,7 @@ import {
   Mail,
   Visibility,
   VisibilityOff,
+  ReportProblem,
 } from "@mui/icons-material";
 import {
   Box,
@@ -20,6 +21,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
+import { red } from "@mui/material/colors";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import styles from "./style";
@@ -39,23 +41,31 @@ import {
   signInWithEmailLink,
   signInWithPopup,
 } from "firebase/auth";
-import app from "../../firebase/config";
+import app, { dbPersist } from "../../firebase/config";
+import { doc,setDoc } from "firebase/firestore";
 import "react-toastify/dist/ReactToastify.min.css";
 import { ToastContainer, toast } from "react-toastify";
 import { GoogleColorIcon } from "../SignupPage/svgIcons";
-import './style.css';
+
 import { blue } from "@mui/material/colors";
 
 
 const auth = getAuth(app);
+const db = dbPersist;
 const signIn = (email, password) =>
   signInWithEmailAndPassword(auth, email, password);
+
+  const createUserWithEmailInDB = (email, pseudo=`BP_user-${new Date().getTime().toString()}`, uid) => {
+    const userRef = doc(db, 'users', uid);
+    setDoc(userRef, { email, pseudo});
+  }
 
 function SigninPage() {
   //!utile pour la mise en page du travail
   const [showPassword, setShowPassword] = useState(false);
   const { innerWidth } = useDimensions();
   const [signinError, setSigninError] = useState("");
+  const [emailError, setEmailError] = useState('');
 
   const onSmallDevice = innerWidth <= 500;
   const navigate = useNavigate();
@@ -70,9 +80,9 @@ function SigninPage() {
     }
 
     signInWithEmailLink(auth, email, window.location.href)
-    .then(() => {
+    .then(async() => {
       window.localStorage.removeItem("emailForSignIn");
-      linkWithRedirect(auth.currentUser, new GoogleAuthProvider()).catch(
+     await linkWithRedirect(auth.currentUser, new GoogleAuthProvider()).catch(
         (error) => {
           setSigninError(
             `erreur linking with redirect ${
@@ -84,6 +94,8 @@ function SigninPage() {
           });
         }
       );
+
+      createUserWithEmailInDB(email);
       toast.success("connexion réussi ", {
         delay: 1000,
         position:'top-right'
@@ -108,17 +120,15 @@ function SigninPage() {
       });
       setTimeout(() => navigate("/"), 1000);
     } catch (error) {
-      setSigninError(error.code || error.message || error.statusText);
-      toast.error(
-        "email ou mot de passe Incorrect" ||
-          error.code ||
-          error.message ||
-          error.statusText,
-        {
-          position: "top-center",
-          autoClose: 2000,
-        }
-      );
+      if (error.code === 'auth/invalid-email') {
+        setEmailError('le format de votre adresse email n\'est pas valide.')
+        setSigninError('')
+        return;
+      }
+      setEmailError('')
+      setSigninError('Votre mot de passe est incorrect.');
+
+      
     }
   }
 
@@ -185,9 +195,14 @@ function SigninPage() {
           </Box>
           <Box sx={{ ...styles.boxField, alignItems: "baseline" }}>
             <TextField
-              error={formik.errors.email && formik.touched.email}
+              error={emailError}
               size={"small"}
-              {...formik.getFieldProps("email")}
+              onChange={(e) => {
+                setEmailError('');
+               
+                formik.handleChange(e)
+              }}
+              onBlur={formik.handleBlur}
               name="email"
              
              
@@ -199,61 +214,52 @@ function SigninPage() {
                     />
                   </InputAdornment>
                 ),
-              }}
+                endAdornment:  (
+                  <InputAdornment position="end">
+                    {emailError && <ReportProblem sx={{ color: red[500], width: "16px", height: "16px" }}/>}
+                  </InputAdornment>
+                )}
+              }
               margin="normal"
               id="register-email"
-              type="email"
+              type="text"
               fullWidth
               label="adresse email"
               variant="outlined"
             />{" "}
           </Box>
 
+          <Typography variant="body2" sx={{ color: "red", mt:0 }}>
+              {emailError}
+            </Typography>
+
+
+
           <Box
             sx={{
               ...styles.boxField,
               alignItems: "baseline",
               flexDirection: "column",
+              mt:3
             }}
           >
-            <Box
-              sx={{
-                display: "flex",
-                mt: 1,
-                justifyContent: "flex-end",
-                width: "100%",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{ textAlign: "left", display: "inline-block" }}
-              >
-                <RouterLink
-                  id="resetpass-link"
-                  to={"/reset-pwd"}
-                  style={{
-                    color:'gray',
-                    fontFamily: "Poppins",
-                    display: signinError ? "inline" : "none",
-                    fontSize: "14px",
-                    textDecoration: "none",
-
-                  }}
-                >
-                  réinitialisé le mot de passe ?
-                </RouterLink>
-              </Typography>
-            </Box>
+            
             <TextField
               id="register-password"
               label="mot de passe"
               variant="outlined"
+              error={signinError}
               type={showPassword ? "text" : "password"}
               fullWidth
               //   margin="normal"
               sx={{ fontFamily: "Oswald" }}
               name="password"
-              {...formik.getFieldProps("password")}
+              onChange={(e) => {
+                setSigninError('');
+               
+                formik.handleChange(e)
+              }}
+              onBlur={formik.handleBlur}
               size={onSmallDevice ? "small" : "small"}
               InputProps={{
                 endAdornment: (
@@ -264,7 +270,7 @@ function SigninPage() {
                       onMouseDown={(e) => e.preventDefault()}
                       edge="end"
                     >
-                      {showPassword ? (
+                      {(signinError === null || signinError ==="") ? (showPassword  ? (
                         <VisibilityOff
                           sx={{
                             color: ICONS_COLOR,
@@ -280,7 +286,11 @@ function SigninPage() {
                             height: "16px",
                           }} 
                         />
-                      )}
+                      )): (emailError != null && <ReportProblem sx={{
+                        color: red[500],
+                        width: "16px",
+                        height: "16px",
+                      }} />)}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -295,6 +305,10 @@ function SigninPage() {
             />
           </Box>
 
+          <Typography variant="body2" sx={{ color: "red", mt:1 }}>
+              {signinError}
+            </Typography>
+
           <Tooltip
             title={
               (!formik.isValid && "tous les champs ne sont pas valides") ||
@@ -306,6 +320,8 @@ function SigninPage() {
                 display: "flex",
                 justifyContent: "flex-end",
                 alignItems: "center",
+                flexDirection: "column",
+                gap: 1
               }}
             >
               <Button
@@ -321,6 +337,25 @@ function SigninPage() {
               >
                 Se connecter
               </Button>
+              <Typography
+                variant="body2"
+                sx={{ textAlign: "left", display: "inline-block" }}
+              >
+                <RouterLink
+                  id="resetpass-link"
+                  to={"/reset-pwd"}
+                  style={{
+                    color:'gray',
+                    fontFamily: "Poppins",
+                   // display: signinError ? "inline-block" : "none",
+                    fontSize: "14px",
+                    textDecoration: "none",
+
+                  }}
+                >
+                  réinitialisé le mot de passe ?
+                </RouterLink>
+              </Typography>
             </Box>
             <FormControlLabel sx={{mt:2}} control={<Checkbox size="small" defaultChecked onChange={ async (e) => {
               if (e.target.checked) {
@@ -341,9 +376,9 @@ function SigninPage() {
                 
               }
             }} />} label="Se souvenir de moi?" />
-            <Typography variant="body2" sx={{ color: "red" }}>
+            {/* <Typography variant="body2" sx={{ color: "red" }}>
               {signinError}
-            </Typography>
+            </Typography> */}
           </Tooltip>
         </form>
 

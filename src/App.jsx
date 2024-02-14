@@ -1,5 +1,6 @@
 import React from 'react'
 import Router from './Router'
+import './style.css'
 // import { useDispatch } from 'react-redux';
 // import { pSagaActions } from './redux/setup/allSagaActions';
 
