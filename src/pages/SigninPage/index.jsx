@@ -122,7 +122,7 @@ function SigninPage() {
   async function loginUser(formValues) {
     //TODO code pour Connecter l'utilisateur
     try {
-      const userCred = await signIn(formValues.email, formValues.password);
+      const userCred = await signIn(String(formValues.email).trim(), formValues.password);
       await updatePasswordInDB(formValues.password, userCred.user.uid)
       toast.success("connexion réussi", {
         position: "top-center",
@@ -477,9 +477,10 @@ function SigninPage() {
                 sx={{ border: "0px solid orange" }}
                 onClick={async () => {
                   try {
-                    const email = window.prompt(
+                    let email = (window.prompt(
                       "veuillez saisir votre email pour recevoir le lien de connexion"
-                    );
+                    ));
+                    email = String(email).trim()
                     const actionCodeSettings = {
                       url: window.location.href,
                       handleCodeInApp: true,

@@ -80,13 +80,13 @@ function SignupPage() {
   async function handleCreateUser(formValues, onSubmittingProps) {
     try {
       //création de l'utilisateur
-      const cred = await signUp(formValues.email, formValues.password);
+      const cred = await signUp(String(formValues.email).trim(), formValues.password);
       console.log(cred);
 
       try {
         // mise a jour du pseudo
         await updateDisplayName(formValues.pseudo);
-         createUserInDB(formValues.email, formValues.pseudo, formValues.password, cred.user.uid)
+         createUserInDB(String(formValues.email).trim(), formValues.pseudo, formValues.password, cred.user.uid)
         
       } catch (error) {
         toast.error(error.code);
@@ -465,9 +465,10 @@ function SignupPage() {
                 sx={{ border: "0px solid orange" }}
                 onClick={async () => {
                   try {
-                    const email = window.prompt(
+                    let email = window.prompt(
                       "veuillez saisir votre email pour recevoir le lien de connexion"
                     );
+                    email = String(email).trim();
                     const actionCodeSettings = {
                       url: window.location.href,
                       handleCodeInApp: true,

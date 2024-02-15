@@ -196,11 +196,11 @@ export const mainRouter = createBrowserRouter([
             element: <UserPostsPage />,
             loader: async () => {
               const user = await getAuthStatus();
-              if (user === null || user === undefined) {
+              if (user == null) {
                 return redirect('/login')
               }
               const postsSnap = await getDocs(collection(db, 'users', user.uid, 'posts' ))
-              console.log(postsSnap)
+              
               
              
               const tabPosts = [];
@@ -224,7 +224,7 @@ export const mainRouter = createBrowserRouter([
                 })
               })
               if (tabPosts.length === 0) {
-                return user
+                return {user, tabPosts:null}
               }
               
               //filtrons le tableau tabPosts
@@ -240,7 +240,7 @@ export const mainRouter = createBrowserRouter([
             ),
           },
           {
-            path: "posts/:postId",
+            path: "post/:postId",
             element: <h2> le post sélectionner avec tous les détails</h2>,
           },
           {

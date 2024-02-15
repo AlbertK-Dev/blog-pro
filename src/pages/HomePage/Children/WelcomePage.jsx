@@ -70,6 +70,7 @@ function WelcomePage() {
         <Stack spacing={1} >
             <RouterLink to={'addpost'}>
           <Fab color='primary' sx={{
+            
             position: {xs: 'fixed',sm: 'fixed', md:'fixed'},
             top: {sm:'100px',md: '100px'},
             left: {sm: '205px', md:'300px'},

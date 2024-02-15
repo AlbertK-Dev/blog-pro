@@ -16,6 +16,7 @@ import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { addDoc, collection, doc, serverTimestamp } from 'firebase/firestore';
 import validFileType from '../../../utlis/images/ValidateFileType';
 import { useNavigate } from "react-router-dom";
+import useOnlineStatus from '../../../hooks/useOnlineStatus';
 
 
 
@@ -46,7 +47,7 @@ const createPostInDB = async (postData, userId) => {
 
 function AddPostPage() {
     const user = auth.currentUser
-    console.log(user)
+    
     const MAX_TAGS = 5;
     const { innerWidth } = useDimensions();
     const postImgfile = useSelector((state) => state.posts.currentAddPostData?.postImgfile);
@@ -63,8 +64,10 @@ function AddPostPage() {
 
     const [publication, setPublication] = useState(false)
     const navigate = useNavigate()
+    const isOnline = useOnlineStatus()
 
     const onSmallDevice = innerWidth <= 500;
+    const onMediumDevice = innerWidth <= 900 && innerWidth > 500;
 
     const defaultPostImgLink = './postImgDefault.jpg';
  
@@ -226,14 +229,8 @@ function AddPostPage() {
             }}
         >
             <Box>
-                <RouterLink to={-1} >
-                    <Fab color='primary' sx={{
-            position: {xs: 'fixed',sm: 'fixed', md:'fixed'},
-            top: {sm:'100px',md: '100px'},
-            left: {sm: '205px', md:'300px'},
-            bottom: {xs:"12px", sm:''},
-            right: {xs:'12px', sm:''},
-                }}> <ArrowBack /> </Fab>
+            <RouterLink to={-1} >
+                    <Fab color='primary' sx={onSmallDevice || onMediumDevice ? { } : { ...styles.fab.sm, position:'fixed' }}> <ArrowBack /> </Fab>
             </RouterLink>
             <Box> {/** title */}
                 <ToastContainer limit={2} />
@@ -276,7 +273,8 @@ function AddPostPage() {
                             size="small"
                             endIcon={<AddAPhoto />}
                             component="label"
-                            variant="contained"
+                        variant="contained"
+                        disabled={!isOnline}
                         >
                             choisir une image
                         <VisuallyHiddenInput
@@ -390,7 +388,8 @@ function AddPostPage() {
                             size="small"
                             endIcon={<AddToPhotos />}
                             component="label"
-                            variant="contained"
+                variant="contained"
+                disabled={!isOnline}
                         >
                             Plus d'images?
                         <VisuallyHiddenInput
@@ -415,9 +414,9 @@ function AddPostPage() {
                                 name="imagetemp"
                             />
             </Button>
-            {othersImagesFiles.length !== 0 && <Box> {/**other images viewer */}
+            {othersImagesFiles.length !== 0 && <Box sx={{opacity:isOnline ? 1 : 0.5}}> {/**other images viewer */}
             <ImageList sx={{ width: '100%', height: 400 }}>
-      <ImageListItem key="Subheader" cols={2}>
+      <ImageListItem  key="Subheader" cols={2}>
         <ListSubheader component="div">autres images</ListSubheader>
       </ImageListItem>
       {othersImagesFiles.map((item, index) => (
@@ -488,7 +487,9 @@ function AddPostPage() {
                            dispach(pActions.updateCurrentAddPostData({otherImageTempLegend: ''}))
                             
                             }}>Annuler</Button>
-                        <Button variant='contained' onClick={() => {
+                        <Button variant='contained'
+                            disabled={!isOnline}
+                            onClick={() => {
                             dispach(pActions.updateCurrentAddPostData({othersImagesFiles: [...othersImagesFiles, { file: otherImageTemp, legend: otherImageTempLegend }]}));
                             dispach(pActions.updateCurrentAddPostData({otherImageTemp: null}))
                            dispach(pActions.updateCurrentAddPostData({otherImageTempLegend: ''}))

@@ -49,8 +49,6 @@ const setLink = async (email) => {
     url: `${window.location.protocol}//${window.location.host}/login`,
     handleCodeInApp: true,
   };
-  console.log(actionCodeSettings, window.location.href, window.location.protocol)
-  
   await sendPasswordResetEmail(auth, email, actionCodeSettings);
  
 }
@@ -100,7 +98,7 @@ function ResetPassword() {
     //TODO code pour Connecter l'utilisateur
     try {
 
-       await setLink(formValues.email)
+       await setLink(String(formValues.email).trim())
      
       toast.success("succès", {
         position: 'top-right',
@@ -225,7 +223,7 @@ function ResetPassword() {
               size='large'
               onChange={(e) => {
                 setEmailError('');
-                setEmailValue(e.target.value);
+                setEmailValue(String(e.target.value).trim());
                
                 formik.handleChange(e)
               }}

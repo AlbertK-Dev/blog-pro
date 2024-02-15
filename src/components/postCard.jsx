@@ -38,8 +38,7 @@ const userActions = [
   { icon: <Edit />, name: 'Editer' },
 ];
 
-const auth = getAuth(app)
-  const user = auth.currentUser
+
 
 export default function PostCard({userId, userAvatar, userPseudo, creationDate, principalImage, content, title, isOffline}) {
  // const [expanded, setExpanded] = React.useState(false);
@@ -48,9 +47,11 @@ export default function PostCard({userId, userAvatar, userPseudo, creationDate, 
 //     setExpanded(!expanded);
   //   };
   
-  console.log(userId)
 
 
+const auth = getAuth(app)
+  const user = auth.currentUser
+ 
     
   
   
@@ -59,7 +60,7 @@ export default function PostCard({userId, userAvatar, userPseudo, creationDate, 
     <Card sx={{ maxWidth: '100%' }}>
       <CardHeader
         avatar={
-                  <Avatar src={userAvatar} alt={userPseudo} sx={{ bgcolor: 'skyblue' }} />       
+          <Avatar src={userAvatar} alt={userPseudo} sx={{ bgcolor: 'skyblue', opacity: isOffline? 0.5 : 1 }} />       
            
         }
         action={

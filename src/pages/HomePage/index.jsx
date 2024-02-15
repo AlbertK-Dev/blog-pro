@@ -16,13 +16,13 @@ import styles from "./style";
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Avatar from "@mui/material/Avatar";
-import Tooltip from "@mui/material/Tooltip";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import { Link as RouterLink, NavLink, Outlet, useLoaderData, useNavigate } from "react-router-dom";
 import { AccountBox, Dashboard, Favorite, Group, Home,  Logout,  Public, RecentActors, Send } from "@mui/icons-material";
 import { getAuth, signOut } from "firebase/auth";
+import PopupState, { bindTrigger, bindMenu } from 'material-ui-popup-state';
 import app from "../../firebase/config";
 import { ToastContainer, /*toast*/ } from "react-toastify";
 import { blue } from "@mui/material/colors";
@@ -41,7 +41,7 @@ const auth = getAuth(app)
 function HomePage() {
   const user = useLoaderData() 
   const navigate = useNavigate();
-  const [drawerActiveLink, setDrawerActiveLink] = React.useState("000000");
+  
 
 //   React.useEffect(() => {
 //     const theUser = auth.currentUser
@@ -57,7 +57,7 @@ function HomePage() {
   // const { window } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
+
 
   const disableMenuListPadding = false
 
@@ -67,15 +67,9 @@ function HomePage() {
  
 
   const NAV_LINK_ACTIVE_COLOR = "#f5f5f5";
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
 
   const disconnectUser = async () => {
-    setAnchorElUser(null);
+  
     await signOut(auth);
     navigate('/')
     
@@ -121,11 +115,9 @@ function HomePage() {
       <List>
         <NavLink
           to={""}
-          className={drawerActiveLink === '100000' ? 'lienActif': 'lienNonActif'}
+
           style={({ isActive, isPending, isTransitioning }) => {
-            if (isActive ===true) {
-              setDrawerActiveLink('100000');
-            }
+            
             return {
               fontWeight: isActive ? "bold" : "small",
               // backgroundColor: isActive? NAV_LINK_ACTIVE_COLOR: 'white',
@@ -145,7 +137,7 @@ function HomePage() {
               </ListItemIcon>
               <ListItemText id="home_list" style={{
                 fontSize: '40px',
-                fontWeight: drawerActiveLink === '100000' ? 'bold' : '',
+
               }} primary="Acceuil" />
             </ListItemButton>
           </ListItem>
@@ -153,11 +145,9 @@ function HomePage() {
 
         <NavLink
           to={"posts"}
-          className={drawerActiveLink === '010000' ? 'lienActif': 'lienNonActif'}
+
           style={({ isActive, isPending, isTransitioning }) => {
-            if (isActive) {
-              setDrawerActiveLink('010000');
-            }
+          
             
             return {
               fontWeight: isActive ? "bold" : "small",
@@ -351,16 +341,45 @@ function HomePage() {
             Bp
           </Typography>
           </Box>
-         
+          <PopupState variant="popover" popupId="demo-popup-menu">
+      {(popupState) => (
+        <React.Fragment>
+          <IconButton variant="contained" {...bindTrigger(popupState)}>
+          <Avatar alt={user?.displayName || "Inconnu"} src={user?.photoURL} />
+          </IconButton>
+          <Menu {...bindMenu(popupState)} sx={{overflowX: 'hidden',overflowY:'scroll'}}>
+                  <MenuItem onClick={popupState.close}>
+                  <RouterLink style={{display: "flex", justifyContent:'space-between',textDecoration:'none', width:'100%', color:'black'}} to={'user'} ><Typography  textAlign="center">Mon Compte</Typography>
+                <AccountBox/></RouterLink>
+            </MenuItem>
+            <MenuItem key={'logOut'} onClick={disconnectUser} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography textAlign="center">Se déconnecter</Typography>
+                  <Logout/>
+                
+                  
+                </MenuItem>
+            {/* <MenuItem onClick={popupState.close}>Logout</MenuItem> */}
+          </Menu>
+        </React.Fragment>
+      )}
+    </PopupState>
 
-          <Box sx={{ flexGrow: 0 }}>
+          {/* <Box sx={{ flexGrow: 0 }}> {/** avatar Menu *
             <Tooltip title="Vos paramètres">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+              <IconButton
+                id="user-menu-button"
+                aria-controls={anchorElUser ? 'menu-appbar' : undefined}
+        aria-haspopup="true"
+        aria-expanded={anchorElUser ? 'true' : undefined}
+                onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt={user?.displayName || "Inconnu"} src={user?.photoURL} />
               </IconButton>
             </Tooltip>
             <Menu
               sx={{ mt: "45px" }}
+              MenuListProps={{
+                'aria-labelledby': 'user-menu-button',
+              }}
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
@@ -370,7 +389,16 @@ function HomePage() {
               keepMounted
               transformOrigin={{
                 vertical: "top",
-                horizontal: "right",
+                horizontal: "left",
+              }}
+              slotProps={{
+                paper:{
+                  style: {
+                    maxHeight: 200,
+                    width: '20ch',
+                    position:'absolute'
+                  },
+                }
               }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
@@ -390,7 +418,7 @@ function HomePage() {
                 </MenuItem>
               
             </Menu>
-          </Box>
+          </Box> */}
         </Toolbar>
       </AppBar>
       <Box
@@ -455,7 +483,7 @@ function HomePage() {
         <Toolbar sx={{ display: {sm:'none', md: "none" } }} />
         <Box sx={{ width: { xs: "100%", sm:'100%', md: "50%", ...styles.flexCenter, alignContent:{sm:'center', md:'center' } }, backgroundColor:'white',mt:{md: '64px',sm:'64px', xs:0}, color: 'black', flex:1 }}>
           <Toolbar sx={{ display: { xs: "none", sm:'block', md: "block" } }} />
-          <Stack /*justifyContent='center' alignItems='center'*/ width={{ xs: "100%", sm: '90%', md: "60%" }} minHeight={{ xs: '100% ', sm: '100%', md: '85vh' }} sx={{/* position: { sm: 'relative', xs:'relative'},*/ border:'0px solid black', p:2, }}>
+          <Stack /*justifyContent='center' alignItems='center'*/ width={{ xs: "100%", sm: '90%', md: "60%" }} minHeight={{ xs: '100% ', sm: '100%', md: '85vh' }} sx={{/* position: { sm: 'relative', xs:'relative'},*/ border:'0px solid black', p:2 }}>
             {/*reservé aux enfants */}
           <Outlet />
           </Stack>
@@ -489,13 +517,13 @@ function HomePage() {
             backgroundColor: 'white',
            minHeight:'91vh',
             flexDirection: 'column',
-            justifyContent: 'flex-start',
+            justifyContent: 'center',
             alignItems: 'center',
             color: blue[500],
             textAlign: 'center',
             gap:1
             
-          }}></Box>
+          }}>hidden</Box>
       </Box>
     </Box>
   );

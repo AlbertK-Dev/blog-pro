@@ -27,6 +27,7 @@ function UserPostsPage() {
  
  
   const initialData = useLoaderData();
+  console.log(initialData)
 
 
   const postList = initialData.tabPosts
@@ -49,8 +50,8 @@ function UserPostsPage() {
       
       postCard.userId = user.uid
       
-      postCard.userPseudo = user.displayName|| `BP_temp-user--${new Date().getTime().toString()}` ;
-      postCard.userAvatar = user.photoURL;
+      postCard.userPseudo = user?.displayName|| `BP_temp-user--${new Date().getTime().toString()}` ;
+      postCard.userAvatar = user?.photoURL;
 
       return postCard
 
@@ -62,11 +63,11 @@ function UserPostsPage() {
   }
 
     
-  if (initialData.tabPosts === undefined || initialData.tabPosts === null) {
+  if (initialData.tabPosts == null) {
     return <Stack spacing={2} justifyContent={'center'} alignContent={'center'} flexDirection={'column'} >
       
       
-      <RouterLink to={'/addpost'}>
+      <RouterLink to={'../addpost'}>
   <Fab color='primary' sx={{
     position: {xs: 'fixed',sm: 'fixed', md:'fixed'},
     top: {sm:'100px',md: '100px'},
@@ -92,7 +93,7 @@ function UserPostsPage() {
           }}
         >
         {` cher(e)`}
-        <i>{user.displayName}</i><br/>
+        <i>{user?.displayName || `BP_temp-user--${new Date().getTime().toString()}` }</i><br/>
            {`Vous n'avez encore rien publier  pour le moment, cliquer sur le bouton < + > pour commencer. '` }
         </Typography>
 
@@ -113,7 +114,7 @@ function UserPostsPage() {
 
     return (
         <Stack spacing={1} >
-            <RouterLink to={'addpost'}>
+            <RouterLink to={'../addpost'}>
           <Fab color='primary' sx={{
             position: {xs: 'fixed',sm: 'fixed', md:'fixed'},
             top: {sm:'100px',md: '100px'},
