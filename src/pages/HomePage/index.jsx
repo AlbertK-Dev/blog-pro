@@ -26,8 +26,9 @@ import PopupState, { bindTrigger, bindMenu } from 'material-ui-popup-state';
 import app from "../../firebase/config";
 import { ToastContainer, /*toast*/ } from "react-toastify";
 import { blue } from "@mui/material/colors";
-import { Button, Stack, TextareaAutosize } from "@mui/material";
+import { Button, Slide, Stack, TextareaAutosize } from "@mui/material";
 import { useDimensions } from "../../hooks/useDimensions";
+import useScrollTrigger from '@mui/material/useScrollTrigger';
 
 
 const drawerWidth = 240;
@@ -35,6 +36,21 @@ const drawerWidth = 240;
 
 
 const auth = getAuth(app)
+
+
+function HideOnScroll(props) {
+  const { children} = props;
+  // Note that you normally won't need to set the window ref as useScrollTrigger
+  // will default to window.
+  // This is only being set here because the demo is in an iframe.
+  const trigger = useScrollTrigger();
+
+  return (
+    <Slide appear={false} direction="down" in={!trigger}>
+      {children}
+    </Slide>
+  );
+}
 
 
 
@@ -287,15 +303,19 @@ function HomePage() {
     <Box sx={{ display: "flex", }}>
         <ToastContainer/>
       <CssBaseline />
-      <AppBar
+      <HideOnScroll>
+        <AppBar
         position="fixed"
+        
         
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
           backgroundColor: 'white',
           boxShadow: '0px 0px 0px gray',
-          color: 'black'
+          color: 'black',
+          p: 0,
+          right:0
           
         }}
       >
@@ -347,7 +367,35 @@ function HomePage() {
           <IconButton variant="contained" {...bindTrigger(popupState)}>
           <Avatar alt={user?.displayName || "Inconnu"} src={user?.photoURL} />
           </IconButton>
-          <Menu {...bindMenu(popupState)} sx={{overflowX: 'hidden',overflowY:'scroll'}}>
+                <Menu {...bindMenu(popupState)}
+                  transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                  anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                  PaperProps={{
+                    elevation: 0,
+                    sx: {
+                      overflow: 'visible',
+                      filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                      mt: 1.5,
+                      '& .MuiAvatar-root': {
+                        width: 32,
+                        height: 32,
+                        ml: -0.5,
+                        mr: 1,
+                      },
+                      '&::before': {
+                        content: '""',
+                        display: 'block',
+                        position: 'absolute',
+                        top: 0,
+                        right: 14,
+                        width: 10,
+                        height: 10,
+                        bgcolor: 'background.paper',
+                        transform: 'translateY(-50%) rotate(45deg)',
+                        zIndex: 0,
+                      },
+                    },
+                  }}>
                   <MenuItem onClick={popupState.close}>
                   <RouterLink style={{display: "flex", justifyContent:'space-between',textDecoration:'none', width:'100%', color:'black'}} to={'user'} ><Typography  textAlign="center">Mon Compte</Typography>
                 <AccountBox/></RouterLink>
@@ -421,6 +469,8 @@ function HomePage() {
           </Box> */}
         </Toolbar>
       </AppBar>
+      </HideOnScroll>
+      
       <Box
         component="nav"
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 }}}
@@ -483,7 +533,7 @@ function HomePage() {
         <Toolbar sx={{ display: {sm:'none', md: "none" } }} />
         <Box sx={{ width: { xs: "100%", sm:'100%', md: "50%", ...styles.flexCenter, alignContent:{sm:'center', md:'center' } }, backgroundColor:'white',mt:{md: '64px',sm:'64px', xs:0}, color: 'black', flex:1 }}>
           <Toolbar sx={{ display: { xs: "none", sm:'block', md: "block" } }} />
-          <Stack /*justifyContent='center' alignItems='center'*/ width={{ xs: "100%", sm: '90%', md: "60%" }} minHeight={{ xs: '100% ', sm: '100%', md: '85vh' }} sx={{/* position: { sm: 'relative', xs:'relative'},*/ border:'0px solid black', p:2 }}>
+          <Stack /*justifyContent='center' alignItems='center'*/ width={{ xs: "100%", sm: '90%', md: "60%" }} minHeight={{ xs: '100% ', sm: '100%', md: '85vh' }} sx={{/* position: { sm: 'relative', xs:'relative'},*/ border:'0px solid black', p:2, pt:1, pb:1 }}>
             {/*reservé aux enfants */}
           <Outlet />
           </Stack>

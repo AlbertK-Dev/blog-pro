@@ -2,13 +2,13 @@ import {
   
   RouterProvider,
   createBrowserRouter,
+  defer,
   redirect,
 } from "react-router-dom";
 import React from "react";
 
 import HomePage from "../pages/HomePage";
 import ErrorPage from "../pages/ErrorPage";
-import WelcomePage from "../pages/HomePage/Children/WelcomePage";
 import NotFoundPage from "../pages/NotFoundPage";
 import {
   browserLocalPersistence,
@@ -22,9 +22,11 @@ import SignupPage from "../pages/SignupPage";
 import SigninPage from "../pages/SigninPage";
 import UserInfosPages from "../pages/HomePage/Children/UserInfosPage";
 import AddPostPage from "../pages/HomePage/Children/AddPostPage";
-import {  collection, collectionGroup, doc, getDoc, getDocs, setDoc} from "firebase/firestore";
+import {  collection, collectionGroup, doc, getDoc, getDocs, query, setDoc, where} from "firebase/firestore";
 import ResetPassword from "../pages/ResetPassword";
 import UserPostsPage from "../pages/HomePage/Children/UserPostsPage";
+import Welcome from "../pages/HomePage/Children/Welcome";
+import PostDetailPage from "../pages/HomePage/Children/PostDetailPage";
 
 
 
@@ -60,6 +62,12 @@ function convertTimeStamp(time) {
   return { date, time: atTime, millisec: complet, completDate: completeDate };
 }
 
+async function getWelcomeData() {
+  const postsSnap = await getDocs(collectionGroup(db, 'posts'))
+  const usersSnap = await getDocs(collection(db, 'users'))
+  return {postsSnap, usersSnap}
+  
+}
 
 function getAuthStatus() {
   return new Promise((resolve) => {
@@ -74,36 +82,6 @@ function getAuthStatus() {
 }
 
 export const mainRouter = createBrowserRouter([
-  //     {
-  //         path: '/',
-  //         element: <Navigate to={'/app'} />,
-  //         errorElement: <ErrorPage />,
-  //         loader: async () => {
-  //             const auth = getAuth(app);
-  //             await setPersistence(auth, browserLocalPersistence)
-  //             console.log('local persistence set')
-  //             return 0
-  //   }
-
-  //     },
-  // {
-  //     path: '/auth',
-  //     element: <AuthPage />,
-
-  //     loader: async () => {
-
-  //         const user = await getAuthStatus()
-  //         console.log('router login ',user)
-  //         if (user != null) {
-  //                return     redirect('/app');
-  //         }
-  //         const userDefaultPhotoRef = ref(storage, 'users/default/avatarDefault.jpg');
-  //         const urlDefault = await getDownloadURL(userDefaultPhotoRef);
-  //         console.log('default photo : ', urlDefault)
-  //         return urlDefault;
-
-  //     },
-  // },
 
   {
     path: "/",
@@ -122,50 +100,16 @@ export const mainRouter = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <WelcomePage />,
+            element: <Welcome />,
             loader: async () => {
               const user = await getAuthStatus();
-              if (user === null || user === undefined) {
+            
+              if (user == null) {
                 return redirect('/login')
               }
-              const postsSnap = await getDocs(collectionGroup(db, 'posts'))
-              const usersSnap = await getDocs(collection(db, 'users'))
-              const tabPosts = [];
-              const tabUsers = [];
+              const welcomeData =  getWelcomeData()
 
-              postsSnap.forEach((doc) => {
-                const info = doc.data()
-                //  const isOffline = doc.metadata.hasPendingWrites;
-                const isOffline = doc.metadata.fromCache
-                tabPosts.push({
-                    ...info,
-                    pid: doc.id,
-                    creationTime: convertTimeStamp(info.creationDate).time,
-                    creationDate: convertTimeStamp(info.creationDate).date,
-                    updateTime: convertTimeStamp(info.updateDate).time,
-                  updateDate: convertTimeStamp(info.updateDate).date,
-                  completeDate: convertTimeStamp(info.updateDate).completDate,
-                    millisec: convertTimeStamp(info.updateDate).millisec,
-                    isOffline
-        
-                })
-              })
-              
-              usersSnap.forEach((doc) => {
-                const info = doc.data()
-                const isOffline = doc.metadata.hasPendingWrites;
-              tabUsers.push({
-                pseudo: info.pseudo,
-                photoURL: info.photoURL,
-                uid: doc.id,
-                isOffline
-           
-                })
-              })
-              //filtrons le tableau tabPosts
-              tabPosts.sort((a,b)=> a.millisec - b.millisec).reverse()
-              
-              return { user,tabPosts, tabUsers};
+              return defer({welcomeData});
             },
           },
           {
@@ -241,7 +185,37 @@ export const mainRouter = createBrowserRouter([
           },
           {
             path: "post/:postId",
-            element: <h2> le post sélectionner avec tous les détails</h2>,
+            element: <PostDetailPage/>,
+            loader: async ({params}) => {
+              const postId = params.postId;
+              const fakeTab = []
+              const q = query( collectionGroup(db, 'posts') , where('pid','==',postId))
+             
+              const postSnap = await getDocs(q);
+              postSnap.forEach((doc) => {
+                const isOffline = doc.metadata.hasPendingWrites;
+                const info = doc.data()
+                fakeTab.push({
+                  ...info,
+                  isOffline,
+                  creationTime: convertTimeStamp(info.creationDate).time,
+                    creationDate: convertTimeStamp(info.creationDate).date,
+                    updateTime: convertTimeStamp(info.updateDate).time,
+                  updateDate: convertTimeStamp(info.updateDate).date,
+                  completeDate: convertTimeStamp(info.updateDate).completDate,
+                })
+              })
+              const authorRef = doc(db, 'users', fakeTab[0].authorId)
+              const authorSnap = await getDoc(authorRef)
+              const authorInfos = {
+                ...authorSnap.data(),
+                uid: authorSnap.id,
+                password: 'invisible'
+              }
+              return {postData:fakeTab[0],authorData:authorInfos}
+              
+
+            }
           },
           {
             path: "addpost",
@@ -265,7 +239,7 @@ export const mainRouter = createBrowserRouter([
     element: <SignupPage />,
     loader: async () => {
       const user = await getAuthStatus();
-      console.log("router register ", user);
+     
 
       if (user != null) {
         return redirect("/");
@@ -299,73 +273,7 @@ export const mainRouter = createBrowserRouter([
   },
 ]);
 
-// export const designRouter = createBrowserRouter([
-//     {
 
-//         path: '/',
-//         element: (<HomePage/>),
-//         loader: async () => {
-
-//             const user = { displayName: 'Albert', email: 'albert@gmail.com', emailVerified: true}
-//             console.log('router ',user)
-//             return user
-
-//         },
-//         children: [
-//             {
-//                 errorElement: <ErrorPage />,
-//                 children: [
-//                     {
-//                         index: true,
-//                         element: <WelcomePage />,
-
-//                     },
-//                     {
-//                         path: 'posts',
-//                         element: <><h1>page d'acceuil avec tous les posts</h1></>,
-
-//                     },
-//                     {
-//                         path: 'user',
-//                         element:<UserInfosPages/>
-
-//                     },
-//                     {
-//                         path: 'dashboard',
-//                         element: <h2>la page configuré essentiellement pour l'utilisateur</h2>
-//                     },
-//                     {
-//                         path: 'posts/:postId',
-//                         element: <h2> le post sélectionner avec tous les détails</h2>
-//                     },
-//                     {
-//                         path: 'addpost',
-//                         element: <h2>formulaire d'ajout de post- l'utilisateur sera redirigé vers /app/postid</h2>
-//                     },
-//                     {
-//                         path: '*',
-//                         element: <NotFoundPage/>
-//                     }
-//                 ]
-//             }]
-//     },
-//     {
-//         path: '/register',
-//         element: <SignupPage />,
-//     },
-//     {
-//         path: '/login',
-//         element: <SigninPage/>
-//     },
-//     {
-//         path: '/reset-pwd',
-//         element: <h1>vous avez cliquez sur reset password?</h1>
-//     },
-//     {
-//         path: '*',
-//         element: <h1>Page non-trouver</h1>
-//     }
-// ])
 
 function Router() {
   return <RouterProvider router={mainRouter}></RouterProvider>;

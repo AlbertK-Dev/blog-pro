@@ -13,7 +13,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { pActions } from '../../../redux/posts/postsSlice';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
-import { addDoc, collection, doc, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import validFileType from '../../../utlis/images/ValidateFileType';
 import { useNavigate } from "react-router-dom";
 import useOnlineStatus from '../../../hooks/useOnlineStatus';
@@ -26,7 +26,7 @@ const storage = getStorage()
 const db = dbPersist
 
 const createLocalImgUrl = (file) => {
-    if (file === null || file === undefined) {
+    if (file == null) {
         return null    
     }
    
@@ -38,7 +38,13 @@ const createLocalImgUrl = (file) => {
 const createPostInDB = async (postData, userId) => {
     const userDocRef = doc(db, 'users', userId);
     const postDocRef = await addDoc(collection(userDocRef, 'posts'), postData)
+    await setDoc(postDocRef, {pid : postDocRef.id}, {merge:true})
     return postDocRef.id
+}
+
+const setID = async (postID, userId) => {
+    const postDocRef = doc(db,'users', userId,'posts', postID)
+    await setDoc(postDocRef, {pid : postID}, {merge:true})
 }
 
 
@@ -176,6 +182,7 @@ function AddPostPage() {
             tags,
             creationDate,
             updateDate,
+            pid:'none'
         }
         toast.update(createPostToast,{
             type: 'info',
@@ -183,7 +190,9 @@ function AddPostPage() {
             render: 'finalisation...'
             
         })
-        await createPostInDB(postData, user.uid);
+            const pid = await createPostInDB(postData, user.uid);
+            await setID(pid,user.uid)
+            
         toast.update(createPostToast,{
             type: 'success',
             isLoading: false,

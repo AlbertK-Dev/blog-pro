@@ -38,8 +38,7 @@ import app from "../../firebase/config";
 import "react-toastify/dist/ReactToastify.min.css";
 import { ToastContainer, toast } from "react-toastify";
 
-
-import { blue } from "@mui/material/colors";
+import { useLang } from "../../provider/langProvider";
 
 
 const auth = getAuth(app);
@@ -87,7 +86,8 @@ function ResetPassword() {
   const [emailValue, setEmailValue] = useState('');
   const [timerComplete, setTimerComplete] = useState(false);
   const [timerTime, setTimerTime] = useState(10)
-  
+  const { texts} = useLang()
+ 
 
  
  
@@ -109,17 +109,17 @@ function ResetPassword() {
     } catch (error) {
       
       if (error.code === 'auth/missing-email') {
-        setEmailError('veuillez Saisir votre adresse email!')
+        setEmailError(texts.errors.emptyField)
         setSigninError('')
         return;
       }
       if (error.code === 'auth/invalid-email' ) {
-        setEmailError('le format de votre adresse email n\'est pas valide.')
+        setEmailError(texts.errors.email)
         setSigninError('')
         return;
       }
       setEmailError('')
-      setSigninError(error.code);
+      setSigninError(texts.errors.other);
 
       
     }
@@ -157,7 +157,7 @@ function ResetPassword() {
          // boxShadow:"0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)",
         }}
       >
-        <Typography
+        {/* <Typography
           variant="body1"
           sx={{
             ...styles.text,
@@ -171,7 +171,7 @@ function ResetPassword() {
           }}
         >
           Blog-Pro
-        </Typography>
+        </Typography> */}
         <Box width={"100%"} sx={{...styles.text}} >
           <LockPerson sx={{ width: '100px', height: '100px', color: 'skyblue', border: '2px solid skyblue', borderRadius:'50%'}}/>
 
@@ -190,7 +190,7 @@ function ResetPassword() {
             textAlign:'center'
           }}
         >
-          {emailAlreadySend === true? 'Consultez-votre boite de méssagerie!' :'Mot de passe Oublié ?'}
+          {emailAlreadySend === true ? 'Consultez-votre boite de méssagerie!' :'Mot de passe Oublié ?'}
         </Typography>
         <form  id='signinForm' onSubmit={formik.handleSubmit}>
           <Box sx={{ ...styles.center, flexDirection: "column", gap: "2px" }}>

@@ -50,6 +50,7 @@ import { GoogleColorIcon } from "../SignupPage/svgIcons";
 import { blue } from "@mui/material/colors";
 
 
+
 const auth = getAuth(app);
 const db = dbPersist;
 const signIn = (email, password) =>
@@ -73,6 +74,7 @@ function SigninPage() {
   const [signinEmailError, setSigninEmailError] = useState("");
   const [signinPassError, setSigninPassError] = useState("");
   const [emailError, setEmailError] = useState('');
+  
 
   const onSmallDevice = innerWidth <= 500;
   const navigate = useNavigate();
@@ -129,6 +131,15 @@ function SigninPage() {
       });
       setTimeout(() => navigate("/"), 1000);
     } catch (error) {
+      console.log(error.code)
+      
+      
+      if (error.code === 'auth/network-request-failed') {
+        setEmailError('')
+        setSigninError('Impossible de joindre le serveur, vérifiez votre connexion internet')
+        setSigninPassError('')
+        return;
+      }
       if (error.code === 'auth/invalid-email') {
         setEmailError('le format de votre adresse email n\'est pas valide.')
         setSigninError('')
@@ -223,7 +234,8 @@ function SigninPage() {
                 startAdornment: (
                   <InputAdornment position="start">
                     <Mail
-                      sx={{ color: ICONS_COLOR, width: "16px", height: "16px" }}
+                      color="primary"
+                      sx={{  width: "16px", height: "16px" }}
                     />
                   </InputAdornment>
                 ),
@@ -286,22 +298,24 @@ function SigninPage() {
                     >
                       {(signinPassError === null || signinPassError ==="") ? (showPassword  ? (
                         <VisibilityOff
+                          color="primary"
                           sx={{
-                            color: ICONS_COLOR,
+                            
                             width: "16px",
                             height: "16px",
                           }} 
                         />
                       ) : (
-                        <Visibility
+                          <Visibility
+                            color="primary"
                           sx={{
-                            color: ICONS_COLOR,
+                            
                             width: "16px",
                             height: "16px",
                           }} 
                         />
-                      )): (signinPassError  && <ReportProblem sx={{
-                        color: red[500],
+                      )): (signinPassError  && <ReportProblem color="error" sx={{
+                        
                         width: "16px",
                         height: "16px",
                       }} />)}
@@ -311,7 +325,8 @@ function SigninPage() {
                 startAdornment: (
                   <InputAdornment position="start">
                     <KeyOutlined
-                      sx={{ color: ICONS_COLOR, width: "16px", height: "16px" }}
+                      color="primary"
+                      sx={{ width: "16px", height: "16px" }}
                     />
                   </InputAdornment>
                 ),
@@ -508,7 +523,7 @@ function SigninPage() {
               </IconButton>
             </Tooltip>
           </Box>
-          <Typography variant="body2" sx={{ color: "red", mt:1 }}>
+          <Typography variant="body2" sx={{ color: "red", mt:1, textAlign:'center' }}>
               {signinError || signinEmailError}
             </Typography>
         </Box>
